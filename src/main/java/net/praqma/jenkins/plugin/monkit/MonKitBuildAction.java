@@ -29,6 +29,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
 import hudson.model.Result;
@@ -37,7 +38,7 @@ import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
 import hudson.util.ShiftedCategoryAxis;
 
-public class MonKitBuildAction implements HealthReportingAction {
+public class MonKitBuildAction implements HealthReportingAction, Action {
 
 	private List<MonKitObservation> monkit;
 	private final AbstractBuild<?, ?> build;
@@ -50,11 +51,11 @@ public class MonKitBuildAction implements HealthReportingAction {
 	}
 	
 	public String getDisplayName() {
-		return "MonKit Reporter";
+		return "MonKit";
 	}
 
 	public String getIconFileName() {
-		return null;
+		return "graph.gif";
 	}
 
 	public String getUrlName() {
@@ -64,6 +65,12 @@ public class MonKitBuildAction implements HealthReportingAction {
 	public HealthReport getBuildHealth() {
 		return new HealthReport( 1, "Snade" );
 	}
+	
+	/*
+    public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
+    	rsp.getOutputStream().println("Her kommer der noget herre fedt paa et tidspunkt....");
+    }
+    */
 	
 	public List<MonKitObservation> getObservations() {
 		return monkit;

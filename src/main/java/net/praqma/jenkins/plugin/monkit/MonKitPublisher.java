@@ -71,7 +71,6 @@ public class MonKitPublisher extends Recorder {
         
         for (int i = 0; i < reports.length; i++) {
         	try {
-        		System.out.println( "MK: " + reports[i].getName() );
 				MonKit mke = MonKit.fromString( reports[i].readToString() );
 				mks.add(mke);
 			} catch (MonKitException e) {
@@ -80,10 +79,8 @@ public class MonKitPublisher extends Recorder {
         }
         
         MonKit mk = MonKit.merge(mks);
-        //System.out.println( mk.toString() );
         
         final MonKitBuildAction mka = new MonKitBuildAction( build, mk.getObservations() );
-
         build.getActions().add(mka);
 		
 		return true;
