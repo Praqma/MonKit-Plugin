@@ -20,8 +20,6 @@
                 <col width="15%"/>
                 <col width="24px"/>
                 <col width="15%"/>
-                <col width="24px"/>
-                <col width="15%"/>
 
                 <tbody>
                     <tr>
@@ -29,9 +27,7 @@
                             <f:textbox name="monkit.target.category" value="${inst.category}"/>
                         </td>
                         <td>
-                            <j:if test="${!loopStatus.first}">
-                                <f:repeatableDeleteButton/>
-                            </j:if>
+                            <f:repeatableDeleteButton/>
                         </td>
                         <th>
                             <img src="${rootURL}/images/16x16/health-80plus.gif" alt="100%"
@@ -39,12 +35,6 @@
                         </th>
                         <td>
                             <f:textbox name="monkit.target.healthy" value="${inst.healthy}"/>
-                        </td>
-                        <th>
-                            <img src="${rootURL}/images/16x16/health-00to19.gif" alt="0%" title="${%Report health as 0% when MonKit report is less than}"/>
-                        </th>
-                        <td>
-                            <f:textbox name="monkit.target.unhealthy" value="${inst.unhealthy}"/>
                         </td>
                         <th>
                             <img src="${rootURL}/images/16x16/yellow.gif" alt="0%" title="${%Mark the build as unstable when MonKit report is less than}"/>

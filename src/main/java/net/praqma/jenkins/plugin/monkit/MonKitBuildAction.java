@@ -65,13 +65,60 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
 
 	public HealthReport getBuildHealth() {
-		return new HealthReport( 1, "Snade" );
+		Integer health = 1;
+		float worst = 100f;
+		String worstStr = "Unknown";
+		boolean healthy = true;
+		
+		/* Stupid n^2 running time.... */
+		for( MonKitTarget mkt : publisher.getTargets() ) {
+			for( MonKitCategory mkc : monkit ) {
+				/* We got the correct category */
+				if( mkt.getCategory().equalsIgnoreCase(mkc.getName()) ) {
+					/* Loop the observations */
+					for( MonKitObservation mko : mkc ) {
+						
+						/* Calculate health */
+						Float f1 = new Float( mko.getValue() );
+						
+						Float f2 = new Float( mkt.getUnstable() );
+						
+						System.out.println( "F1=" + f1 + ". F2=" + f2 );
+						
+						if( f1 < f2 ) {
+							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
+						}
+						
+						Float f3 = new Float( mkt.getHealthy() );
+						System.out.println( "F3=" + f3 );
+						
+						if( f1 < f3 ) {
+							float diff = f3 - f2;
+							float nf1 = f1 - f2;
+							float inter = ( nf1 / diff ) * 100;
+							
+							if( inter < worst ) {
+								worst = inter;
+								worstStr = mkc.getName() + " for " + mko.getName();
+							}
+							healthy = false;
+						}
+					}
+				}
+			}
+		}
+		
+		if( healthy ) {
+			return new HealthReport( 100, "MonKit Report" );
+		} else {
+			return new HealthReport( (int)worst, "MonKit Report: " + worstStr);
+		}
 	}
 	
 	public List<String> getCategories() {
 		List<String> categories = new ArrayList<String>();
-		for( MonKitTarget mkt : publisher.getTargets() ) {
-			categories.add(mkt.getCategory());
+		for( MonKitCategory mkc : monkit ) {
+			categories.add(mkc.getName());
 		}
 		
 		return categories;
