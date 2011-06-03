@@ -16,7 +16,6 @@
             <table width="100%">
                 <col width="25%"/>
                 <col/>
-                <col width="10%"/>
                 <col width="24px"/>
                 <col width="15%"/>
                 <col width="24px"/>
@@ -29,13 +28,6 @@
                         </td>
                         <td>
                             <f:repeatableDeleteButton/>
-                        </td>
-                        
-                        <td>
-                            <select class="setting-input" name="monkit.target.compare">
-                             	<f:option selected="${'gt'==inst.compare}" value="gt">${%Greater than}</f:option>
-                             	<f:option selected="${'lt'==inst.compare}" value="lt">${%Lesser than}</f:option>
-                            </select>
                         </td>
                         
                         <th>

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
 import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitObservation;
 
@@ -65,6 +66,20 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
 
 	public HealthReport getBuildHealth() {
+		Case worst = publisher.getWorst(monkit);
+		
+		/* Unstable */
+		if( worst.health == null ) {
+			return new HealthReport( 0, "MonKit Report: " + worst.category + " for " + worst.name );
+		} else if( worst.category == null ) {
+			return new HealthReport( 100, "MonKit Report" );
+		} else {
+			return new HealthReport( worst.health.intValue(), "MonKit Report: " + worst.category + " for " + worst.name );
+		}
+	}
+	
+	public HealthReport getBuildHealth1() {
+		Integer health = 1;
 		float worst = 100f;
 		String worstStr = "Unknown";
 		boolean healthy = true;
@@ -81,17 +96,26 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 						Float f = new Float( mko.getValue() );
 						
 						Float fu = new Float( mkt.getUnstable() );
+						Float fh = new Float( mkt.getHealthy() );
 						
-						if( ( mkt.isGreater() && f < fu ) || ( !mkt.isGreater() && f > fu ) ) {
+						boolean isGreater = fu < fh;
+						
+						System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						
+						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
 						}
 						
-						Float fh = new Float( mkt.getHealthy() );
+						System.out.println( "F3=" + fh );
 						
-						if( ( mkt.isGreater() && f < fh ) || (  !mkt.isGreater() && f > fh ) ) {
+						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
 							float diff = fh - fu;
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
+							
+							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							
+							System.out.println( "INTER=" +  inter );
 							
 							if( inter < worst ) {
 								worst = inter;
@@ -168,7 +192,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	String category = req.getParameter("category");
-    	
+    	System.out.println("I got cat " + category);
     	if( category == null ) {
     		throw new IOException( "No type given" );
     	}
@@ -194,10 +218,13 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
             /* Loop the categories */
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
+            	System.out.println( "CAT=" + mkc.getName() );
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
+            		System.out.println( "INCLUDED" );
             		/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
+            			System.out.println( "OBS=" + mko.getName() );
 	            		Float f = new Float( mko.getValue() );
 	            		dsb.add(f, mko.getName(), label);
 	            		
@@ -219,6 +246,8 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             	}
             }
         }
+        
+        System.out.println("MIN=" + min + ", MAX=" + max);
 
         ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), 500, 200);
     }

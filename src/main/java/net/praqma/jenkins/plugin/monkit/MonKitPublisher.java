@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.praqma.monkit.MonKit;
+import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitException;
+import net.praqma.monkit.MonKitObservation;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.beanutils.ConvertUtils;
@@ -22,6 +24,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Descriptor.FormException;
 import hudson.tasks.BuildStepDescriptor;
@@ -83,6 +86,12 @@ public class MonKitPublisher extends Recorder {
         final MonKitBuildAction mka = new MonKitBuildAction( build, mk.getCategories() );
         mka.setPublisher(this);
         build.getActions().add(mka);
+        
+        Case worst = getWorst(mk.getCategories());
+        
+        if(worst.health == null) {
+        	build.setResult(Result.UNSTABLE);
+        }
 		
 		return true;
 	}
@@ -116,6 +125,80 @@ public class MonKitPublisher extends Recorder {
     private void setTargets( List<MonKitTarget> targets ) {
     	this.targets.clear();
     	this.targets = targets;
+    }
+    
+    public class Case {
+    	Float health = 100f;
+    	String category = "";
+    	String name = "";
+    	
+    	public Case() {}
+    	
+    	public Case( Float health, String category, String name ) {
+    		this.health = health;
+    		this.category = category;
+    		this.name = name;
+    	}
+    }
+    
+    public Case getWorst( List<MonKitCategory> monkit ) {
+		//float worst = 100f;
+		//String worstStr = "Unknown";
+		boolean healthy = true;
+		
+		Case worst = new Case();
+		
+		/* Stupid n^2 running time.... */
+		for( MonKitTarget mkt : getTargets() ) {
+			for( MonKitCategory mkc : monkit ) {
+				/* We got the correct category */
+				if( mkt.getCategory().equalsIgnoreCase(mkc.getName()) ) {
+					/* Loop the observations */
+					for( MonKitObservation mko : mkc ) {
+						
+						/* Calculate health */
+						Float f = new Float( mko.getValue() );
+						
+						Float fu = new Float( mkt.getUnstable() );
+						Float fh = new Float( mkt.getHealthy() );
+						
+						boolean isGreater = fu < fh;
+						
+						System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						
+						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+							return new Case( null, mkc.getName(), mko.getName() );
+						}
+						
+						System.out.println( "F3=" + fh );
+						
+						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
+							float diff = fh - fu;
+							float nf1 = f - fu;
+							float inter = ( nf1 / diff ) * 100;
+							
+							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							
+							System.out.println( "INTER=" +  inter );
+							
+							if( inter < worst.health ) {
+								worst.health = inter;
+								//worstStr = mkc.getName() + " for " + mko.getName();
+								worst.category = mkc.getName();
+								worst.name = mko.getName();
+							}
+							healthy = false;
+						}
+					}
+				}
+			}
+		}
+		
+		if( healthy ) {
+			return new Case( 100f, null, null );
+		} else {
+			return worst;
+		}
     }
     
     /**
