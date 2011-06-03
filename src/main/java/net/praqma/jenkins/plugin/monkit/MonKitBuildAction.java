@@ -65,7 +65,6 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
 
 	public HealthReport getBuildHealth() {
-		Integer health = 1;
 		float worst = 100f;
 		String worstStr = "Unknown";
 		boolean healthy = true;
@@ -83,23 +82,16 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 						
 						Float fu = new Float( mkt.getUnstable() );
 						
-						System.out.println( "F1=" + f + ". F2=" + fu );
-						
 						if( ( mkt.isGreater() && f < fu ) || ( !mkt.isGreater() && f > fu ) ) {
 							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
 						}
 						
 						Float fh = new Float( mkt.getHealthy() );
-						System.out.println( "F3=" + fh );
 						
 						if( ( mkt.isGreater() && f < fh ) || (  !mkt.isGreater() && f > fh ) ) {
 							float diff = fh - fu;
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
-							
-							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
-							
-							System.out.println( "INTER=" +  inter );
 							
 							if( inter < worst ) {
 								worst = inter;
@@ -202,13 +194,10 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
             /* Loop the categories */
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
-            	System.out.println( "CAT=" + mkc.getName() );
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
-            		System.out.println( "INCLUDED" );
             		/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
-            			System.out.println( "OBS=" + mko.getName() );
 	            		Float f = new Float( mko.getValue() );
 	            		dsb.add(f, mko.getName(), label);
 	            		
@@ -230,8 +219,6 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             	}
             }
         }
-        
-        System.out.println("MIN=" + min + ", MAX=" + max);
 
         ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), 500, 200);
     }
