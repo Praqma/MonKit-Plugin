@@ -11,4 +11,54 @@
     <f:entry title="${%Consider only stable builds}">
        <f:checkbox name="monkit.onlyStable" checked="${instance.onlyStable}" />                                                                                        
     </f:entry>
+    
+    
+    
+   <f:entry title="${%Coverage Metric Targets}"
+             description="${%metric.targets.description(rootURL)}">
+        <f:repeatable var="inst" varStatus="instStatus" items="${descriptor.getTargets(instance)}">
+            <table width="100%">
+                <col width="25%"/>
+                <col/>
+                <col width="24px"/>
+                <col width="15%"/>
+                <col width="24px"/>
+                <col width="15%"/>
+                <col width="24px"/>
+                <col width="15%"/>
+
+                <tbody>
+                    <tr>
+                        <td>
+                            <f:textbox name="monkit.target.unit" value="${inst.unit}"/>
+                        </td>
+                        <td>
+                            <j:if test="${!loopStatus.first}">
+                                <f:repeatableDeleteButton/>
+                            </j:if>
+                        </td>
+                        <th>
+                            <img src="${rootURL}/images/16x16/health-80plus.gif" alt="100%"
+                                 title="${%Report health as 100% when MonKit report is greater than}"/>
+                        </th>
+                        <td>
+                            <f:textbox name="monkit.target.healthy" value="${inst.healthy}"/>
+                        </td>
+                        <th>
+                            <img src="${rootURL}/images/16x16/health-00to19.gif" alt="0%" title="${%Report health as 0% when MonKit report is less than}"/>
+                        </th>
+                        <td>
+                            <f:textbox name="monkit.target.unhealthy" value="${inst.unhealthy}"/>
+                        </td>
+                        <th>
+                            <img src="${rootURL}/images/16x16/yellow.gif" alt="0%" title="${%Mark the build as unstable when MonKit report is less than}"/>
+                        </th>
+                        <td>
+                            <f:textbox name="monkit.target.unstable" value="${inst.unstable}"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </f:repeatable>
+    
 </j:jelly>

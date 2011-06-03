@@ -17,20 +17,10 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
 
     private final AbstractProject<?, ?> project;
     private boolean onlyStable;
-    private String[] unitsArray;
-    private String units;
 
-    public MonKitProjectAction(AbstractProject<?, ?> project, boolean onlyStable, String units) {
+    public MonKitProjectAction(AbstractProject<?, ?> project, boolean onlyStable) {
         this.project    = project;
         this.onlyStable = onlyStable;
-        
-        if( units != null ) {
-	        this.unitsArray = units.split("[;:\\+]");
-	        this.units = units;
-        } else {
-        	this.units = "";
-        	this.unitsArray = new String[0];
-        }
     }
 	
 	public String getDisplayName() {
@@ -48,10 +38,6 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
 	public String getUrlName() {
 		return "monkit";
 	}
-	
-    public List<String> getUnits() {
-    	return Arrays.asList(unitsArray);
-    }
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
         if (getLastResult() != null) {

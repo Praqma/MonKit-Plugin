@@ -8,8 +8,11 @@ import java.util.List;
 
 import net.praqma.monkit.MonKit;
 import net.praqma.monkit.MonKitException;
+import net.sf.json.JSONObject;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -20,6 +23,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Descriptor.FormException;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -31,16 +35,12 @@ public class MonKitPublisher extends Recorder {
 	public static final MonKitFilenameFilter __MONKIT_FILENAME_FILTER = new MonKitFilenameFilter();
 	private boolean onlyStable;
 	
-    private String[] unitsArray;
-    private String units;
+    private List<MonKitUnit> targets;
 	
     @DataBoundConstructor 
-    public MonKitPublisher( String monKitFile, boolean onlyStable, String units ) {
+    public MonKitPublisher( String monKitFile, boolean onlyStable ) {
         this.monKitFile = monKitFile;
         this.onlyStable = onlyStable;
-        System.out.println("I GOT=" + units);
-        this.unitsArray = units.split("[;:\\+]");
-        this.units = units;
     }
 	
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -50,8 +50,6 @@ public class MonKitPublisher extends Recorder {
         final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();
                
         FilePath[] reports = new FilePath[0];
-        
-        System.out.println( "MODULEROOT: " + moduleRoot.getName() );
                 
         try {
             reports = moduleRoot.list(monKitFile);
@@ -79,8 +77,8 @@ public class MonKitPublisher extends Recorder {
         }
         
         MonKit mk = MonKit.merge(mks);
-        
-        final MonKitBuildAction mka = new MonKitBuildAction( build, mk.getObservations() );
+
+        final MonKitBuildAction mka = new MonKitBuildAction( build, mk.getCategories() );
         build.getActions().add(mka);
 		
 		return true;
@@ -107,9 +105,14 @@ public class MonKitPublisher extends Recorder {
     public boolean isOnlyStable() {
     	return onlyStable;
     }
+        
+    public List<MonKitUnit> getTargets() {
+    	return targets;
+    }
     
-    public String getUnits() {
-    	return units;
+    private void setTargets( List<MonKitUnit> targets ) {
+    	this.targets.clear();
+    	this.targets = targets;
     }
     
     /**
@@ -117,7 +120,7 @@ public class MonKitPublisher extends Recorder {
      */
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        return new MonKitProjectAction(project, getOnlyStable(), units);
+        return new MonKitProjectAction(project, getOnlyStable());
     }
     
     @Extension
@@ -130,6 +133,14 @@ public class MonKitPublisher extends Recorder {
 		public boolean isApplicable(Class<? extends AbstractProject> arg0) {
 			return true;
 		}
+		
+        @Override
+        public MonKitPublisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        	MonKitPublisher instance = req.bindJSON(MonKitPublisher.class, formData);
+            List<MonKitUnit> targets = req.bindParametersToList(MonKitUnit.class, "monkit.target.");
+            instance.setTargets(targets);
+            return instance;
+        }
     }
 
 }

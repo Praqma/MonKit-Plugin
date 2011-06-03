@@ -6,11 +6,10 @@
         <j:choose>
             <j:when test="${lastResult.previousResult != null}">
             	<j:forEach var="unit" items="${from.getUnits()}">
-	                <div>
+	            
 	                    <a href="${from.urlName}/">
-	                        <img src="${from.urlName}/graph?type=${unit}"/>
+	                        <img src="${from.urlName}/graph?category=${unit}"/>
 	                    </a>
-	                </div>
 	            </j:forEach>
             </j:when>
             <j:otherwise>

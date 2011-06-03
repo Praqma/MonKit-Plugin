@@ -3,13 +3,10 @@ package net.praqma.jenkins.plugin.monkit;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import net.praqma.monkit.MonKit;
+import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitObservation;
 
 import org.jfree.chart.ChartFactory;
@@ -24,7 +21,6 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -40,11 +36,11 @@ import hudson.util.ShiftedCategoryAxis;
 
 public class MonKitBuildAction implements HealthReportingAction, Action {
 
-	private List<MonKitObservation> monkit;
+	private List<MonKitCategory> monkit;
 	private final AbstractBuild<?, ?> build;
 	private boolean onlyStable;
 	
-	public MonKitBuildAction( AbstractBuild<?, ?> build, List<MonKitObservation> monkit ) {
+	public MonKitBuildAction( AbstractBuild<?, ?> build, List<MonKitCategory> monkit ) {
 		this.monkit     = monkit;
 		this.build      = build;
 		this.onlyStable = false;
@@ -72,7 +68,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
     }
     */
 	
-	public List<MonKitObservation> getObservations() {
+	public List<MonKitCategory> getCategories() {
 		return monkit;
 	}
 	
@@ -113,9 +109,9 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
     }
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    	String type = req.getParameter("type");
-    	System.out.println("I got " + type);
-    	if( type == null ) {
+    	String category = req.getParameter("category");
+    	System.out.println("I got cat " + category);
+    	if( category == null ) {
     		throw new IOException( "No type given" );
     	}
     	
@@ -138,27 +134,37 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 
         for (MonKitBuildAction a = this; a != null; a = a.getPreviousResult()) {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
-            for (MonKitObservation mko : a.getObservations() ) {
-            	if( mko.getName().equalsIgnoreCase(type) ) {
-            		Float f = new Float( mko.getValue() );
-            		dsb.add(f, mko.getName(), label);
-            		
-            		/* MAX */
-            		if( f.intValue() > max ) {
-            			max = f.intValue();
+            /* Loop the categories */
+            for (MonKitCategory mkc : a.getCategories() ) {
+            	/* Check the category name */
+            	if( mkc.getName().equalsIgnoreCase(category) ) {
+            		/* Loop the observations */
+            		for( MonKitObservation mko : mkc ) {
+	            		Float f = new Float( mko.getValue() );
+	            		dsb.add(f, mko.getName(), label);
+	            		
+	            		System.out.println( mko.getName() + ": " + f.intValue() );
+	            		
+	            		if( f.intValue() > max ) {
+	            			max = f.intValue() + 1;
+	            		}
+	            		
+	            		if( f.intValue() < min ) {
+	            			min = f.intValue();
+	            			if( min != 0 ) {
+	            				min--;
+	            			}
+	            		}
+	            		
+	            		scale = mkc.getScale();
             		}
-            		
-            		/* MIN */
-            		if( f.intValue() < min ) {
-            			min = f.intValue();
-            		}
-            		
-            		scale = mko.getScale();
             	}
             }
         }
+        
+        System.out.println("MIN=" + min + ", MAX=" + max);
 
-        ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), type, scale, max, min), 500, 200);
+        ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), 500, 200);
     }
 	
     private JFreeChart createChart(CategoryDataset dataset, String title, String yaxis, int max, int min) {
