@@ -168,7 +168,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	String category = req.getParameter("category");
-    	System.out.println("I got cat " + category);
+    	
     	if( category == null ) {
     		throw new IOException( "No type given" );
     	}
