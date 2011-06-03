@@ -31,7 +31,7 @@
                         </td>
                         
                         <td>
-                            <select class="setting-input" name="cobertura.target.compare">
+                            <select class="setting-input" name="monkit.target.compare">
                              	<f:option selected="${'gt'==inst.compare}" value="gt">${%Greater than}</f:option>
                              	<f:option selected="${'lt'==inst.compare}" value="lt">${%Lesser than}</f:option>
                             </select>

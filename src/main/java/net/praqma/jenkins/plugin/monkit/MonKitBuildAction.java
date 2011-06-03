@@ -97,6 +97,10 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
 							
+							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							
+							System.out.println( "INTER=" +  inter );
+							
 							if( inter < worst ) {
 								worst = inter;
 								worstStr = mkc.getName() + " for " + mko.getName();
