@@ -16,6 +16,20 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
 
 	<repositories>
 		<repository>
@@ -90,19 +104,17 @@
         </developer>
     </developers>
     
-    <!--
 	<scm>
-		<connection>scm:git:ssh://github.com/Praqma/Matrix-Reloaded-Plugin.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/Praqma/Matrix-Reloaded-Plugin.git</developerConnection>
-		<url>https://github.com/Praqma/Matrix-Reloaded-Plugin.git</url>
+		<connection>scm:git:ssh://github.com/Praqma/MonKit-Plugin.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/Praqma/MonKit-Plugin.git</developerConnection>
+		<url>https://github.com/Praqma/MonKit-Plugin.git</url>
 	</scm>
-	-->
 	
 	<dependencies>
 		<dependency>
 			<groupId>net.praqma</groupId>
 			<artifactId>monkit</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
+			<version>0.1.5</version>
 		</dependency>
 	</dependencies>
 	
