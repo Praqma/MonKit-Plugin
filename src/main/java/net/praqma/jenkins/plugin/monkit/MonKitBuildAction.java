@@ -79,22 +79,22 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 					for( MonKitObservation mko : mkc ) {
 						
 						/* Calculate health */
-						Float f1 = new Float( mko.getValue() );
+						Float f = new Float( mko.getValue() );
 						
-						Float f2 = new Float( mkt.getUnstable() );
+						Float fu = new Float( mkt.getUnstable() );
 						
-						System.out.println( "F1=" + f1 + ". F2=" + f2 );
+						System.out.println( "F1=" + f + ". F2=" + fu );
 						
-						if( f1 < f2 ) {
+						if( ( mkt.isGreater() && f < fu ) || ( !mkt.isGreater() && f > fu ) ) {
 							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
 						}
 						
-						Float f3 = new Float( mkt.getHealthy() );
-						System.out.println( "F3=" + f3 );
+						Float fh = new Float( mkt.getHealthy() );
+						System.out.println( "F3=" + fh );
 						
-						if( f1 < f3 ) {
-							float diff = f3 - f2;
-							float nf1 = f1 - f2;
+						if( ( mkt.isGreater() && f < fh ) || (  !mkt.isGreater() && f > fh ) ) {
+							float diff = fh - fu;
+							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
 							
 							if( inter < worst ) {

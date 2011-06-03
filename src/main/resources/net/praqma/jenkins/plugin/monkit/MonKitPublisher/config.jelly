@@ -29,6 +29,14 @@
                         <td>
                             <f:repeatableDeleteButton/>
                         </td>
+                        
+                        <td>
+                            <select class="setting-input" name="cobertura.target.compare">
+                             	<f:option selected="${'gt'==inst.compare}" value="gt">${%Greater than}</f:option>
+                             	<f:option selected="${'lt'==inst.compare}" value="lt">${%Lesser than}</f:option>
+                            </select>
+                        </td>
+                        
                         <th>
                             <img src="${rootURL}/images/16x16/health-80plus.gif" alt="100%"
                                  title="${%Report health as 100% when MonKit report is greater than}"/>
