@@ -36,6 +36,11 @@
 			<id>m.g.o-public</id>
 			<url>http://maven.glassfish.org/content/groups/public/</url>
 		</repository>
+		
+		<repository>
+			<id>praqma-repo</id>
+			<url>http://code.praqma.net/repo/maven/</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -114,7 +119,7 @@
 		<dependency>
 			<groupId>net.praqma</groupId>
 			<artifactId>monkit</artifactId>
-			<version>0.1.5</version>
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	
