@@ -3,6 +3,7 @@ package net.praqma.jenkins.plugin.monkit;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -39,11 +40,16 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	private List<MonKitCategory> monkit;
 	private final AbstractBuild<?, ?> build;
 	private boolean onlyStable;
+	private MonKitPublisher publisher;
 	
 	public MonKitBuildAction( AbstractBuild<?, ?> build, List<MonKitCategory> monkit ) {
 		this.monkit     = monkit;
 		this.build      = build;
 		this.onlyStable = false;
+	}
+	
+	public void setPublisher( MonKitPublisher publisher) {
+		this.publisher = publisher;
 	}
 	
 	public String getDisplayName() {
@@ -62,13 +68,22 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		return new HealthReport( 1, "Snade" );
 	}
 	
+	public List<String> getCategories() {
+		List<String> categories = new ArrayList<String>();
+		for( MonKitTarget mkt : publisher.getTargets() ) {
+			categories.add(mkt.getCategory());
+		}
+		
+		return categories;
+	}
+	
 	/*
     public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	rsp.getOutputStream().println("Her kommer der noget herre fedt paa et tidspunkt....");
     }
     */
 	
-	public List<MonKitCategory> getCategories() {
+	public List<MonKitCategory> getMonKitCategories() {
 		return monkit;
 	}
 	
@@ -135,11 +150,14 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
         for (MonKitBuildAction a = this; a != null; a = a.getPreviousResult()) {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
             /* Loop the categories */
-            for (MonKitCategory mkc : a.getCategories() ) {
+            for (MonKitCategory mkc : a.getMonKitCategories() ) {
+            	System.out.println( "CAT=" + mkc.getName() );
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
+            		System.out.println( "INCLUDED" );
             		/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
+            			System.out.println( "OBS=" + mko.getName() );
 	            		Float f = new Float( mko.getValue() );
 	            		dsb.add(f, mko.getName(), label);
 	            		

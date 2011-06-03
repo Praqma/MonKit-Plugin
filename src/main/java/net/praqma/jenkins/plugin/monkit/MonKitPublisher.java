@@ -35,12 +35,14 @@ public class MonKitPublisher extends Recorder {
 	public static final MonKitFilenameFilter __MONKIT_FILENAME_FILTER = new MonKitFilenameFilter();
 	private boolean onlyStable;
 	
-    private List<MonKitUnit> targets;
+    private List<MonKitTarget> targets;
 	
     @DataBoundConstructor 
     public MonKitPublisher( String monKitFile, boolean onlyStable ) {
         this.monKitFile = monKitFile;
         this.onlyStable = onlyStable;
+        
+        targets = new ArrayList<MonKitTarget>();
     }
 	
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -79,6 +81,7 @@ public class MonKitPublisher extends Recorder {
         MonKit mk = MonKit.merge(mks);
 
         final MonKitBuildAction mka = new MonKitBuildAction( build, mk.getCategories() );
+        mka.setPublisher(this);
         build.getActions().add(mka);
 		
 		return true;
@@ -105,12 +108,12 @@ public class MonKitPublisher extends Recorder {
     public boolean isOnlyStable() {
     	return onlyStable;
     }
-        
-    public List<MonKitUnit> getTargets() {
+    
+    public List<MonKitTarget> getTargets() {
     	return targets;
     }
     
-    private void setTargets( List<MonKitUnit> targets ) {
+    private void setTargets( List<MonKitTarget> targets ) {
     	this.targets.clear();
     	this.targets = targets;
     }
@@ -137,9 +140,29 @@ public class MonKitPublisher extends Recorder {
         @Override
         public MonKitPublisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
         	MonKitPublisher instance = req.bindJSON(MonKitPublisher.class, formData);
-            List<MonKitUnit> targets = req.bindParametersToList(MonKitUnit.class, "monkit.target.");
+            List<MonKitTarget> targets = req.bindParametersToList(MonKitTarget.class, "monkit.target.");
             instance.setTargets(targets);
             return instance;
+        }
+        
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+            req.bindParameters(this, "monkit.");
+            save();
+            return super.configure(req, formData);
+        }
+        
+        public List<MonKitTarget> getDefaultTargets() {
+            List<MonKitTarget> result = new ArrayList<MonKitTarget>();
+            return result;
+        }
+        
+        public List<MonKitTarget> getTargets(MonKitPublisher instance) {
+            if (instance == null) {
+                return getDefaultTargets();
+            }
+            
+            return instance.getTargets();
         }
     }
 

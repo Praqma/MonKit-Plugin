@@ -3,10 +3,6 @@
     <f:entry title="${%MonKit report file}">
         <f:textbox name="monkit.monKitFile" value="${instance.monKitFile}"/>
     </f:entry>
-    
-    <f:entry title="${%MonKit units}">
-        <f:textbox name="monkit.units" value="${instance.units}"/>
-    </f:entry>
 
     <f:entry title="${%Consider only stable builds}">
        <f:checkbox name="monkit.onlyStable" checked="${instance.onlyStable}" />                                                                                        
@@ -30,7 +26,7 @@
                 <tbody>
                     <tr>
                         <td>
-                            <f:textbox name="monkit.target.unit" value="${inst.unit}"/>
+                            <f:textbox name="monkit.target.category" value="${inst.category}"/>
                         </td>
                         <td>
                             <j:if test="${!loopStatus.first}">
@@ -60,5 +56,6 @@
                 </tbody>
             </table>
         </f:repeatable>
+    </f:entry>
     
 </j:jelly>
