@@ -8,7 +8,7 @@
 	</parent>
 
 	<groupId>net.praqma</groupId>
-	<artifactId>monkit</artifactId>
+	<artifactId>monkit-plugin</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 	<name>MonKit Plugin</name>
 	<packaging>hpi</packaging>
