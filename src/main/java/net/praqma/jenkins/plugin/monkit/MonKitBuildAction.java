@@ -100,22 +100,22 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 						
 						boolean isGreater = fu < fh;
 						
-						System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
 						}
 						
-						System.out.println( "F3=" + fh );
+						//System.out.println( "F3=" + fh );
 						
 						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
 							float diff = fh - fu;
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
 							
-							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
 							
-							System.out.println( "INTER=" +  inter );
+							//System.out.println( "INTER=" +  inter );
 							
 							if( inter < worst ) {
 								worst = inter;
@@ -192,7 +192,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	String category = req.getParameter("category");
-    	System.out.println("I got cat " + category);
+    	//System.out.println("I got cat " + category);
     	if( category == null ) {
     		throw new IOException( "No type given" );
     	}
@@ -218,17 +218,17 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
             /* Loop the categories */
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
-            	System.out.println( "CAT=" + mkc.getName() );
+            	//System.out.println( "CAT=" + mkc.getName() );
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
-            		System.out.println( "INCLUDED" );
+            		//System.out.println( "INCLUDED" );
             		/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
-            			System.out.println( "OBS=" + mko.getName() );
+            			//System.out.println( "OBS=" + mko.getName() );
 	            		Float f = new Float( mko.getValue() );
 	            		dsb.add(f, mko.getName(), label);
 	            		
-	            		System.out.println( mko.getName() + ": " + f.intValue() );
+	            		//System.out.println( mko.getName() + ": " + f.intValue() );
 	            		
 	            		if( f.intValue() > max ) {
 	            			max = f.intValue() + 1;
@@ -247,7 +247,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             }
         }
         
-        System.out.println("MIN=" + min + ", MAX=" + max);
+        //System.out.println("MIN=" + min + ", MAX=" + max);
 
         ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), 500, 200);
     }
