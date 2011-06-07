@@ -1,0 +1,28 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:u="/util">
+	
+	<tr><td colspan="2">
+	<h1>${%MonKit Report}</h1>
+
+	<j:set var="monkit" value="${from.getMonKitCategories()}"/>
+
+	<table style="border-collapse:collapse;">
+	<j:forEach var="mkc" items="${monkit}">
+		<tr>
+			<td align="center" style="border-bottom:solid;font-weight:bold;padding-right:15px;font-size:16" colspan="2">${mkc.getName()}</td>
+		</tr>
+		<j:forEach var="mko" items="${mkc}">
+			<tr>
+				<td style="border-bottom:solid;font-weight:bold;padding-right:15px">${mko.getName()}:</td>
+				<td style="border-bottom:solid">${mko.getValue()} ${mko.getScale()}</td>
+			</tr>
+		</j:forEach>
+		<tr>
+			<td style="height:20px" colspan="2"> </td>
+		</tr>
+	</j:forEach>
+	</table>
+	</td></tr>
+	
+</j:jelly>
