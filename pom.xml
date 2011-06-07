@@ -17,6 +17,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
+	<distributionManagement>
+		<repository>
+			<id>praqma</id>
+			<name>praqma</name>
+			<url>scp://10.10.1.25:/var/www/repo/maven</url>
+		</repository>
+	</distributionManagement>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -119,7 +127,7 @@
 		<dependency>
 			<groupId>net.praqma</groupId>
 			<artifactId>monkit</artifactId>
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.6</version>
 		</dependency>
 	</dependencies>
 	
