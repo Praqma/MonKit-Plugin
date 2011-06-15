@@ -45,9 +45,11 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         }
     }
     
+    /*
     public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	rsp.getOutputStream().println("Her kommer der noget herre fedt paa et tidspunkt....");
     }
+    */
     
     public void doSnade(StaplerRequest req, StaplerResponse rsp) throws IOException {
         rsp.getOutputStream().println("Hej, mand!");

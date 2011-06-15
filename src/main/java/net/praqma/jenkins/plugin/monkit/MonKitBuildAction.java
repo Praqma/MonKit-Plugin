@@ -192,6 +192,18 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	
     public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
     	String category = req.getParameter("category");
+    	
+    	int width = 500, height = 200;
+    	String w = req.getParameter("width");
+    	String h = req.getParameter("height");
+    	if( w != null && w.length() > 0 ) {
+    		width = Integer.parseInt(w);
+    	}
+    	
+    	if( h != null && h.length() > 0 ) {
+    		height = Integer.parseInt(h);
+    	}
+    	
     	//System.out.println("I got cat " + category);
     	if( category == null ) {
     		throw new IOException( "No type given" );
@@ -249,7 +261,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
         
         //System.out.println("MIN=" + min + ", MAX=" + max);
 
-        ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), 500, 200);
+        ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), width, height);
     }
 	
     private JFreeChart createChart(CategoryDataset dataset, String title, String yaxis, int max, int min) {
