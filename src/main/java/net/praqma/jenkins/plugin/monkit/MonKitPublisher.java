@@ -27,6 +27,7 @@ import hudson.model.BuildListener;
 import hudson.model.HealthReport;
 import hudson.model.Result;
 import hudson.model.Descriptor.FormException;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -49,7 +50,7 @@ public class MonKitPublisher extends Recorder {
     }
 	
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		
+		Hudson.getInstance().getComputers();
         final FilePath[] moduleRoots = build.getModuleRoots();
         final boolean multipleModuleRoots = moduleRoots != null && moduleRoots.length > 1;
         final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();

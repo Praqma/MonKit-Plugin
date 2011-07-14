@@ -11,6 +11,7 @@ import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
 import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitObservation;
 
+import org.codehaus.groovy.syntax.Numbers;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -230,17 +231,19 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
             /* Loop the categories */
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
-            	//System.out.println( "CAT=" + mkc.getName() );
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
-            		//System.out.println( "INCLUDED" );
             		/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
             			//System.out.println( "OBS=" + mko.getName() );
-	            		Float f = new Float( mko.getValue() );
+            			Float f;
+            			try {
+            				f = new Float( mko.getValue() );
+            			} catch( NumberFormatException e) {
+            				System.err.println( "[MonKitPlugin] Unknown number " + mko.getValue() );
+            				continue;
+            			}
 	            		dsb.add(f, mko.getName(), label);
-	            		
-	            		//System.out.println( mko.getName() + ": " + f.intValue() );
 	            		
 	            		if( f.intValue() > max ) {
 	            			max = f.intValue() + 1;
