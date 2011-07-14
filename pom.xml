@@ -9,7 +9,7 @@
 
 	<groupId>net.praqma</groupId>
 	<artifactId>monkit-plugin</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.2.0</version>
 	<name>MonKit Plugin</name>
 	<description>Integrates MonKit reports to Jenkins</description>
 	<packaging>hpi</packaging>
