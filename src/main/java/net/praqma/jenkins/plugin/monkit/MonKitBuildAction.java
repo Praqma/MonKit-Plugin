@@ -224,6 +224,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 
         DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
         
+        float health = 100.0f;
         int min = 1000000, max = -110001100;
         String scale = "Unknown";
 
@@ -233,7 +234,18 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
-            		/* Loop the observations */
+            		
+            		/**/
+            		MonKitTarget mkt = publisher.getTarget(category);
+            		
+            		Float fu = null;
+            		Float fh = null;
+            		if( mkt != null ) {
+						fu = new Float( mkt.getUnstable() );
+						fh = new Float( mkt.getHealthy() );
+            		}
+					
+					/* Loop the observations */
             		for( MonKitObservation mko : mkc ) {
             			//System.out.println( "OBS=" + mko.getName() );
             			Float f;
@@ -257,9 +269,32 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	            		}
 	            		
 	            		scale = mkc.getScale();
+	            		
+	            		/*  HEALTH!!!  */
+	            		if( mkt != null ) {
+							boolean isGreater = fu < fh;
+							
+							/* Mark build as unstable */
+							if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+								health = 0.0f;
+							}else if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
+								float diff = fh - fu;
+								float nf1 = f - fu;
+								float inter = ( nf1 / diff ) * 100;
+								
+								if( inter < health ) {
+									health = inter;
+								}
+							}
+	            		}
+	            		
             		}
             	}
             }
+        }
+        
+        if( health < 100.0f ) {
+        	category += " health @ " + Math.abs( Math.floor( health ) ) + "%";
         }
         
         //System.out.println("MIN=" + min + ", MAX=" + max);

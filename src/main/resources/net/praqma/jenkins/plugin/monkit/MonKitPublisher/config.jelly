@@ -32,13 +32,13 @@
                         
                         <th>
                             <img src="${rootURL}/images/16x16/health-80plus.gif" alt="100%"
-                                 title="${%Report health as 100% when MonKit report is greater than}"/>
+                                 title="${%Threshold to report health as 100%}"/>
                         </th>
                         <td>
                             <f:textbox name="monkit.target.healthy" value="${inst.healthy}"/>
                         </td>
                         <th>
-                            <img src="${rootURL}/images/16x16/yellow.gif" alt="0%" title="${%Mark the build as unstable when MonKit report is less than}"/>
+                            <img src="${rootURL}/images/16x16/yellow.gif" alt="0%" title="${%Threshold to mark the build as unstable}"/>
                         </th>
                         <td>
                             <f:textbox name="monkit.target.unstable" value="${inst.unstable}"/>

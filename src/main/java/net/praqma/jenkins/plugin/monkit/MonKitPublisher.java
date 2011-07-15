@@ -12,7 +12,6 @@ import net.praqma.monkit.MonKitException;
 import net.praqma.monkit.MonKitObservation;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.beanutils.ConvertUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -24,9 +23,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.HealthReport;
 import hudson.model.Result;
-import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -123,6 +120,26 @@ public class MonKitPublisher extends Recorder {
     	return targets;
     }
     
+    public MonKitTarget getTarget( String category ) {
+    	for( MonKitTarget mkt : getTargets() ) {
+    		if( mkt.getCategory().equals(category) ) {
+    			return mkt;
+    		}
+    	}
+    	
+    	return null;
+    }
+    
+    public MonKitCategory getMonKitCategory( List<MonKitCategory> monkit, MonKitTarget mkt ) {
+		for( MonKitCategory mkc : monkit ) {
+			if( mkt.getCategory().equalsIgnoreCase(mkc.getName()) ) {
+				return mkc;
+			}
+		}
+		
+		return null;
+    }
+    
     private void setTargets( List<MonKitTarget> targets ) {
     	this.targets.clear();
     	this.targets = targets;
@@ -167,6 +184,7 @@ public class MonKitPublisher extends Recorder {
 						
 						System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						
+						/* Mark build as unstable */
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 							return new Case( null, mkc.getName(), mko.getName() );
 						}
