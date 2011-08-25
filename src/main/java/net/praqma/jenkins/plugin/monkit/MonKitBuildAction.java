@@ -19,9 +19,12 @@ import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.Series;
+import org.jfree.data.xy.XYSeries;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
@@ -78,64 +81,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 			return new HealthReport( worst.health.intValue(), "MonKit Report: " + worst.category + " for " + worst.name );
 		}
 	}
-	
-	public HealthReport getBuildHealth1() {
-		Integer health = 1;
-		float worst = 100f;
-		String worstStr = "Unknown";
-		boolean healthy = true;
 		
-		/* Stupid n^2 running time.... */
-		for( MonKitTarget mkt : publisher.getTargets() ) {
-			for( MonKitCategory mkc : monkit ) {
-				/* We got the correct category */
-				if( mkt.getCategory().equalsIgnoreCase(mkc.getName()) ) {
-					/* Loop the observations */
-					for( MonKitObservation mko : mkc ) {
-						
-						/* Calculate health */
-						Float f = new Float( mko.getValue() );
-						
-						Float fu = new Float( mkt.getUnstable() );
-						Float fh = new Float( mkt.getHealthy() );
-						
-						boolean isGreater = fu < fh;
-						
-						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
-						
-						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
-							return new HealthReport( 0, "MonKit Report: " + mkc.getName() + " for " + mko.getName() );
-						}
-						
-						//System.out.println( "F3=" + fh );
-						
-						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
-							float diff = fh - fu;
-							float nf1 = f - fu;
-							float inter = ( nf1 / diff ) * 100;
-							
-							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
-							
-							//System.out.println( "INTER=" +  inter );
-							
-							if( inter < worst ) {
-								worst = inter;
-								worstStr = mkc.getName() + " for " + mko.getName();
-							}
-							healthy = false;
-						}
-					}
-				}
-			}
-		}
-		
-		if( healthy ) {
-			return new HealthReport( 100, "MonKit Report" );
-		} else {
-			return new HealthReport( (int)worst, "MonKit Report: " + worstStr);
-		}
-	}
-	
 	public List<String> getCategories() {
 		List<String> categories = new ArrayList<String>();
 		for( MonKitCategory mkc : monkit ) {
@@ -227,11 +173,18 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
         float health = 100.0f;
         int min = 1000000, max = -110001100;
         String scale = "Unknown";
+        
+        boolean latest = true;
 
+        /* For each build, moving backwards */
         for (MonKitBuildAction a = this; a != null; a = a.getPreviousResult()) {
+        	
+        	/* Make the x-axis label */
             ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
-            /* Loop the categories */
+            
+            /* Loop the categories for current build */
             for (MonKitCategory mkc : a.getMonKitCategories() ) {
+            	
             	/* Check the category name */
             	if( mkc.getName().equalsIgnoreCase(category) ) {
             		
@@ -243,6 +196,16 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             		if( mkt != null ) {
 						fu = new Float( mkt.getUnstable() );
 						fh = new Float( mkt.getHealthy() );
+						
+						dsb.add(fh, "<Healthy>", label);
+						if( max < fh ) {
+							max = (int) Math.floor(fh);
+						}
+						
+						dsb.add(fu, "<Unstable>", label);
+						if( min > fu ) {
+							min = (int) Math.floor(fu);
+						}
             		}
 					
 					/* Loop the observations */
@@ -275,9 +238,9 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             		
             		/*  HEALTH!!!
             		 * Only consider last  */
-            		if( mkt != null ) {
+            		if( mkt != null && latest ) {
 						boolean isGreater = fu < fh;
-						
+						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						/* Mark build as unstable */
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 							health = 0.0f;
@@ -286,17 +249,23 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
 							
+							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							
 							if( inter < health ) {
+								//System.out.println( "INTER: " + inter );
 								health = inter;
 							}
 						}
             		}
             	}
             }
+            
+            latest = false;
         }
         
         if( health < 100.0f ) {
-        	category += " health @ " + Math.abs( Math.floor( health ) ) + "%";
+        	//System.out.println( "HEALTH: " + health );
+        	category += " health @ " + ( Math.abs( Math.floor( health * 100 ) ) / 100 ) + "%";
         }
         
         //System.out.println("MIN=" + min + ", MAX=" + max);
@@ -319,6 +288,8 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 
         // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
+        
+        
         final LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.RIGHT);
 
@@ -331,6 +302,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
         plot.setOutlinePaint(null);
         plot.setRangeGridlinesVisible(true);
         plot.setRangeGridlinePaint(Color.black);
+        
 
         CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
         plot.setDomainAxis(domainAxis);
@@ -338,7 +310,8 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
         domainAxis.setLowerMargin(0.0);
         domainAxis.setUpperMargin(0.0);
         domainAxis.setCategoryMargin(0.0);
-
+        
+        
         final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         rangeAxis.setUpperBound(max);

@@ -166,11 +166,14 @@ public class MonKitPublisher extends Recorder {
 		
 		Case worst = new Case();
 		
-		/* Stupid n^2 running time.... */
+		/* Only consider latest build */
 		for( MonKitTarget mkt : getTargets() ) {
+			
 			for( MonKitCategory mkc : monkit ) {
+				
 				/* We got the correct category */
 				if( mkt.getCategory().equalsIgnoreCase(mkc.getName()) ) {
+					
 					/* Loop the observations */
 					for( MonKitObservation mko : mkc ) {
 						
@@ -182,23 +185,21 @@ public class MonKitPublisher extends Recorder {
 						
 						boolean isGreater = fu < fh;
 						
-						System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						
 						/* Mark build as unstable */
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 							return new Case( null, mkc.getName(), mko.getName() );
 						}
 						
-						System.out.println( "F3=" + fh );
-						
 						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
 							float diff = fh - fu;
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
 							
-							System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
+							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
 							
-							System.out.println( "INTER=" +  inter );
+							//System.out.println( "INTER=" +  inter );
 							
 							if( inter < worst.health ) {
 								worst.health = inter;
