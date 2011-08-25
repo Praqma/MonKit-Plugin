@@ -246,9 +246,10 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             		}
 					
 					/* Loop the observations */
+            		Float f = 0f;
             		for( MonKitObservation mko : mkc ) {
             			//System.out.println( "OBS=" + mko.getName() );
-            			Float f;
+            			
             			try {
             				f = new Float( mko.getValue() );
             			} catch( NumberFormatException e) {
@@ -270,24 +271,25 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	            		
 	            		scale = mkc.getScale();
 	            		
-	            		/*  HEALTH!!!  */
-	            		if( mkt != null ) {
-							boolean isGreater = fu < fh;
+            		}
+            		
+            		/*  HEALTH!!!
+            		 * Only consider last  */
+            		if( mkt != null ) {
+						boolean isGreater = fu < fh;
+						
+						/* Mark build as unstable */
+						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+							health = 0.0f;
+						} else if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
+							float diff = fh - fu;
+							float nf1 = f - fu;
+							float inter = ( nf1 / diff ) * 100;
 							
-							/* Mark build as unstable */
-							if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
-								health = 0.0f;
-							}else if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
-								float diff = fh - fu;
-								float nf1 = f - fu;
-								float inter = ( nf1 / diff ) * 100;
-								
-								if( inter < health ) {
-									health = inter;
-								}
+							if( inter < health ) {
+								health = inter;
 							}
-	            		}
-	            		
+						}
             		}
             	}
             }
