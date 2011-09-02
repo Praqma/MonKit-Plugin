@@ -9,8 +9,8 @@
 			</l:tasks>
 		</l:side-panel>
 		<l:main-panel>
-			<st:include page="main.jelly" />
-			DO YA!
+			<st:include page="main.jelly" /><!-- Including main.jelly -->
+			<!-- Something for the main panel -->
 		</l:main-panel>
 	</l:layout>
 </j:jelly>

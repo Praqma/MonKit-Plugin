@@ -238,7 +238,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             		
             		/*  HEALTH!!!
             		 * Only consider last  */
-            		if( mkt != null && latest ) {
+            		if( latest && mkt != null ) {
 						boolean isGreater = fu < fh;
 						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						/* Mark build as unstable */
