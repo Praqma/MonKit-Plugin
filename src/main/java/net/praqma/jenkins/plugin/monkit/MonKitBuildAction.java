@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
 import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
 import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitObservation;
 
-import org.codehaus.groovy.syntax.Numbers;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -19,12 +19,9 @@ import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.general.Series;
-import org.jfree.data.xy.XYSeries;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
@@ -47,16 +44,18 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	private boolean onlyStable;
 	private MonKitPublisher publisher;
 	
+	private Logger logger = Logger.getLogger( MonKitBuildAction.class.getName() );
+
 	public MonKitBuildAction( AbstractBuild<?, ?> build, List<MonKitCategory> monkit ) {
-		this.monkit     = monkit;
-		this.build      = build;
+		this.monkit = monkit;
+		this.build = build;
 		this.onlyStable = false;
 	}
-	
-	public void setPublisher( MonKitPublisher publisher) {
+
+	public void setPublisher( MonKitPublisher publisher ) {
 		this.publisher = publisher;
 	}
-	
+
 	public String getDisplayName() {
 		return "MonKit";
 	}
@@ -70,8 +69,8 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
 
 	public HealthReport getBuildHealth() {
-		Case worst = publisher.getWorst(monkit);
-		
+		Case worst = publisher.getWorst( monkit );
+
 		/* Unstable */
 		if( worst.health == null ) {
 			return new HealthReport( 0, "MonKit Report: " + worst.category + " for " + worst.name );
@@ -81,250 +80,259 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 			return new HealthReport( worst.health.intValue(), "MonKit Report: " + worst.category + " for " + worst.name );
 		}
 	}
-		
+
 	public List<String> getCategories() {
 		List<String> categories = new ArrayList<String>();
 		for( MonKitCategory mkc : monkit ) {
-			categories.add(mkc.getName());
+			categories.add( mkc.getName() );
 		}
-		
+
 		return categories;
 	}
-	
+
 	/*
-    public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    	rsp.getOutputStream().println("Her kommer der noget herre fedt paa et tidspunkt....");
-    }
-    */
-	
+	 * public void doIndex(StaplerRequest req, StaplerResponse rsp) throws
+	 * IOException { rsp.getOutputStream().println(
+	 * "Her kommer der noget herre fedt paa et tidspunkt...."); }
+	 */
+
 	public List<MonKitCategory> getMonKitCategories() {
 		return monkit;
 	}
-	
+
 	public AbstractBuild<?, ?> getBuild() {
 		return build;
 	}
-	
-    public MonKitBuildAction getPreviousResult() {
-        return getPreviousResult(build);
-    }
-    
-    private boolean includeOnlyStable() {
-        return onlyStable;
-    }
-    
-    /**
-     * Gets the previous {@link CoberturaBuildAction} of the given build.
-     */
-    /*package*/
-    static MonKitBuildAction getPreviousResult(AbstractBuild<?,?> start) {
-        AbstractBuild<?, ?> b = start;
-        while (true) {
-            b = b.getPreviousNotFailedBuild();
-            if (b == null) {
-                return null;
-            }
-            
-            assert b.getResult() != Result.FAILURE : "We asked for the previous not failed build";
-            MonKitBuildAction r = b.getAction(MonKitBuildAction.class);
-            if(r != null && r.includeOnlyStable() && b.getResult() != Result.SUCCESS){
-                r = null;
-            }
-            
-            if (r != null) {
-                return r;
-            }
-        }
-    }
-	
-    public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    	String category = req.getParameter("category");
-    	
-    	int width = 500, height = 200;
-    	String w = req.getParameter("width");
-    	String h = req.getParameter("height");
-    	if( w != null && w.length() > 0 ) {
-    		width = Integer.parseInt(w);
-    	}
-    	
-    	if( h != null && h.length() > 0 ) {
-    		height = Integer.parseInt(h);
-    	}
-    	
-    	//System.out.println("I got cat " + category);
-    	if( category == null ) {
-    		throw new IOException( "No type given" );
-    	}
-    	
-        if (ChartUtil.awtProblemCause != null) {
-            // not available. send out error message
-            rsp.sendRedirect2(req.getContextPath() + "/images/headless.png");
-            return;
-        }
 
-        Calendar t = build.getTimestamp();
+	public MonKitBuildAction getPreviousResult() {
+		return getPreviousResult( build );
+	}
 
-        if ( req.checkIfModified( t, rsp ) ) {
-            return; // up to date
-        }
+	private boolean includeOnlyStable() {
+		return onlyStable;
+	}
 
-        DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
-        
-        float health = 100.0f;
-        int min = 1000000, max = -110001100;
-        String scale = "Unknown";
-        
-        boolean latest = true;
+	/**
+	 * Gets the previous {@link CoberturaBuildAction} of the given build.
+	 */
+	/* package */
+	static MonKitBuildAction getPreviousResult( AbstractBuild<?, ?> start ) {
+		AbstractBuild<?, ?> b = start;
+		while( true ) {
+			b = b.getPreviousNotFailedBuild();
+			if( b == null ) {
+				return null;
+			}
 
-        /* For each build, moving backwards */
-        for (MonKitBuildAction a = this; a != null; a = a.getPreviousResult()) {
-        	
-        	/* Make the x-axis label */
-            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(a.build);
-            
-            /* Loop the categories for current build */
-            for (MonKitCategory mkc : a.getMonKitCategories() ) {
-            	
-            	/* Check the category name */
-            	if( mkc.getName().equalsIgnoreCase(category) ) {
-            		
-            		/**/
-            		MonKitTarget mkt = publisher.getTarget(category);
-            		
-            		Float fu = null;
-            		Float fh = null;
-            		if( mkt != null ) {
+			assert b.getResult() != Result.FAILURE : "We asked for the previous not failed build";
+			MonKitBuildAction r = b.getAction( MonKitBuildAction.class );
+			if( r != null && r.includeOnlyStable() && b.getResult() != Result.SUCCESS ) {
+				r = null;
+			}
+
+			if( r != null ) {
+				return r;
+			}
+		}
+	}
+
+	public void doGraph( StaplerRequest req, StaplerResponse rsp ) throws IOException {
+		String category = req.getParameter( "category" );
+		
+		logger.fine( "Graphing " + category );
+
+		int width = 500, height = 200;
+		String w = req.getParameter( "width" );
+		String h = req.getParameter( "height" );
+		if( w != null && w.length() > 0 ) {
+			width = Integer.parseInt( w );
+		}
+
+		if( h != null && h.length() > 0 ) {
+			height = Integer.parseInt( h );
+		}
+
+		// System.out.println("I got cat " + category);
+		if( category == null ) {
+			throw new IOException( "No type given" );
+		}
+
+		if( ChartUtil.awtProblemCause != null ) {
+			// not available. send out error message
+			rsp.sendRedirect2( req.getContextPath() + "/images/headless.png" );
+			return;
+		}
+
+		Calendar t = build.getTimestamp();
+
+		if( req.checkIfModified( t, rsp ) ) {
+			return; // up to date
+		}
+
+		DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
+
+		float health = 100.0f;
+		int min = 1000000, max = -110001100;
+		String scale = "Unknown";
+
+		boolean latest = true;
+
+		/* For each build, moving backwards */
+		for( MonKitBuildAction a = this; a != null; a = a.getPreviousResult() ) {
+			logger.finest( "Build " + a.getDisplayName() );
+
+			/* Make the x-axis label */
+			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel( a.build );
+
+			/* Loop the categories for current build */
+			for( MonKitCategory mkc : a.getMonKitCategories() ) {
+				
+				/* If the category name matches!!! */
+				if( mkc.getName().equalsIgnoreCase( category ) ) {
+
+					/**/
+					MonKitTarget mkt = publisher.getTarget( category );
+
+					Float fu = null;
+					Float fh = null;
+					if( mkt != null ) {
 						fu = new Float( mkt.getUnstable() );
 						fh = new Float( mkt.getHealthy() );
-						
-						dsb.add(fh, "<Healthy>", label);
+
+						dsb.add( fh, "<Healthy>", label );
 						if( max < fh ) {
-							max = (int) Math.floor(fh);
+							max = (int) Math.floor( fh );
+						}
+
+						dsb.add( fu, "<Unstable>", label );
+						if( min > fu ) {
+							min = (int) Math.floor( fu );
+						}
+					}
+					
+					logger.finer( "float unstable: " + fu );
+					logger.finer( "float health: " + fh );
+
+					/* Loop the observations */
+					Float f = 0f;
+					for( MonKitObservation mko : mkc ) {
+						try {
+							f = new Float( mko.getValue() );
+						} catch (NumberFormatException e) {
+							System.err.println( "[MonKitPlugin] Unknown number " + mko.getValue() );
+							continue;
 						}
 						
-						dsb.add(fu, "<Unstable>", label);
-						if( min > fu ) {
-							min = (int) Math.floor(fu);
+						logger.fine( "Observation: " + mko.getName() + "(" + f + ")" );
+						
+						/* Plotting the graph */
+						dsb.add( f, mko.getName(), label );
+
+						if( f.intValue() > max ) {
+							max = f.intValue() + 1;
 						}
-            		}
-					
-					/* Loop the observations */
-            		Float f = 0f;
-            		for( MonKitObservation mko : mkc ) {
-            			//System.out.println( "OBS=" + mko.getName() );
-            			
-            			try {
-            				f = new Float( mko.getValue() );
-            			} catch( NumberFormatException e) {
-            				System.err.println( "[MonKitPlugin] Unknown number " + mko.getValue() );
-            				continue;
-            			}
-	            		dsb.add(f, mko.getName(), label);
-	            		
-	            		if( f.intValue() > max ) {
-	            			max = f.intValue() + 1;
-	            		}
-	            		
-	            		if( f.intValue() < min ) {
-	            			min = f.intValue();
-	            			if( min != 0 ) {
-	            				min--;
-	            			}
-	            		}
-	            		
-	            		scale = mkc.getScale();
-	            		
-            		}
-            		
-            		/*  HEALTH!!!
-            		 * Only consider last  */
-            		if( latest && mkt != null ) {
+
+						if( f.intValue() < min ) {
+							min = f.intValue();
+							if( min != 0 ) {
+								min--;
+							}
+						}
+
+						/* we're only interested in the last scale */
+						if( latest ) {
+							scale = mkc.getScale();
+						}
+
+					}
+
+					/*
+					 * HEALTH!!! Only consider last build
+					 */
+					if( latest && mkt != null ) {
 						boolean isGreater = fu < fh;
-						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						logger.finer( "FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+						
 						/* Mark build as unstable */
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+							logger.fine( "Build is unstable" );
 							health = 0.0f;
-						} else if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
+						} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
 							float diff = fh - fu;
 							float nf1 = f - fu;
 							float inter = ( nf1 / diff ) * 100;
-							
-							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
-							
+
+							logger.fine( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" + inter );
+
 							if( inter < health ) {
-								//System.out.println( "INTER: " + inter );
+								logger.fine( "INTER: " + inter );
 								health = inter;
 							}
 						}
-            		}
-            	}
-            }
-            
-            latest = false;
-        }
-        
-        if( health < 100.0f ) {
-        	//System.out.println( "HEALTH: " + health );
-        	category += " health @ " + ( Math.abs( Math.floor( health * 100 ) ) / 100 ) + "%";
-        }
-        
-        //System.out.println("MIN=" + min + ", MAX=" + max);
+					}
+				}
+			}
 
-        ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), category, scale, max, min), width, height);
-    }
-	
-    private JFreeChart createChart(CategoryDataset dataset, String title, String yaxis, int max, int min) {
+			/* Only the latest(first found) build is considered  */
+			latest = false;
+		}
 
-        final JFreeChart chart = ChartFactory.createLineChart(
-                title,                   // chart title
-                null,                   // unused
-                yaxis,                    // range axis label
-                dataset,                  // data
-                PlotOrientation.VERTICAL, // orientation
-                true,                     // include legend
-                true,                     // tooltips
-                false                     // urls
-        );
+		if( health < 100.0f ) {
+			logger.fine( "HEALTH: " + health );
+			category += " health @ " + ( Math.abs( Math.floor( health * 100 ) ) / 100 ) + "%";
+		}
 
-        // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
+		ChartUtil.generateGraph( req, rsp, createChart( dsb.build(), category, scale, max, min ), width, height );
+	}
 
-        
-        
-        final LegendTitle legend = chart.getLegend();
-        legend.setPosition(RectangleEdge.RIGHT);
+	private JFreeChart createChart( CategoryDataset dataset, String title, String yaxis, int max, int min ) {
 
-        chart.setBackgroundPaint(Color.white);
+		final JFreeChart chart = ChartFactory.createLineChart( title, // chart
+																		// title
+				null, // unused
+				yaxis, // range axis label
+				dataset, // data
+				PlotOrientation.VERTICAL, // orientation
+				true, // include legend
+				true, // tooltips
+				false // urls
+		);
 
-        final CategoryPlot plot = chart.getCategoryPlot();
+		// NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
-        // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
-        plot.setBackgroundPaint(Color.WHITE);
-        plot.setOutlinePaint(null);
-        plot.setRangeGridlinesVisible(true);
-        plot.setRangeGridlinePaint(Color.black);
-        
+		final LegendTitle legend = chart.getLegend();
+		legend.setPosition( RectangleEdge.RIGHT );
 
-        CategoryAxis domainAxis = new ShiftedCategoryAxis(null);
-        plot.setDomainAxis(domainAxis);
-        domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
-        domainAxis.setLowerMargin(0.0);
-        domainAxis.setUpperMargin(0.0);
-        domainAxis.setCategoryMargin(0.0);
-        
-        
-        final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        rangeAxis.setUpperBound(max);
-        rangeAxis.setLowerBound(min);
+		chart.setBackgroundPaint( Color.white );
 
-        final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
-        renderer.setBaseStroke(new BasicStroke(2.0f));
-        ColorPalette.apply(renderer);
+		final CategoryPlot plot = chart.getCategoryPlot();
 
-        // crop extra space around the graph
-        plot.setInsets(new RectangleInsets(5.0, 0, 0, 5.0));
+		// plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
+		plot.setBackgroundPaint( Color.WHITE );
+		plot.setOutlinePaint( null );
+		plot.setRangeGridlinesVisible( true );
+		plot.setRangeGridlinePaint( Color.black );
 
-        return chart;
-    }
+		CategoryAxis domainAxis = new ShiftedCategoryAxis( null );
+		plot.setDomainAxis( domainAxis );
+		domainAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_90 );
+		domainAxis.setLowerMargin( 0.0 );
+		domainAxis.setUpperMargin( 0.0 );
+		domainAxis.setCategoryMargin( 0.0 );
+
+		final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+		rangeAxis.setStandardTickUnits( NumberAxis.createIntegerTickUnits() );
+		rangeAxis.setUpperBound( max );
+		rangeAxis.setLowerBound( min );
+
+		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
+		renderer.setBaseStroke( new BasicStroke( 2.0f ) );
+		ColorPalette.apply( renderer );
+
+		// crop extra space around the graph
+		plot.setInsets( new RectangleInsets( 5.0, 0, 0, 5.0 ) );
+
+		return chart;
+	}
 
 }
