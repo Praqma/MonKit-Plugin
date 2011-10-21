@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
@@ -28,6 +31,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Hudson;
 import hudson.model.Action;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
@@ -44,12 +48,13 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	private boolean onlyStable;
 	private MonKitPublisher publisher;
 	
-	private Logger logger = Logger.getLogger( MonKitBuildAction.class.getName() );
+	private static Logger logger = Logger.getLogger( MonKitBuildAction.class.getName() );
 
 	public MonKitBuildAction( AbstractBuild<?, ?> build, List<MonKitCategory> monkit ) {
 		this.monkit = monkit;
 		this.build = build;
 		this.onlyStable = false;
+		
 	}
 
 	public void setPublisher( MonKitPublisher publisher ) {
@@ -244,29 +249,28 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 							scale = mkc.getScale();
 						}
 
-					}
-
-					/*
-					 * HEALTH!!! Only consider last build
-					 */
-					if( latest && mkt != null ) {
-						boolean isGreater = fu < fh;
-						logger.finer( "FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
-						
-						/* Mark build as unstable */
-						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
-							logger.fine( "Build is unstable" );
-							health = 0.0f;
-						} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
-							float diff = fh - fu;
-							float nf1 = f - fu;
-							float inter = ( nf1 / diff ) * 100;
-
-							logger.fine( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" + inter );
-
-							if( inter < health ) {
-								logger.fine( "INTER: " + inter );
-								health = inter;
+						/*
+						 * HEALTH!!! Only consider last build
+						 */
+						if( latest && mkt != null ) {
+							boolean isGreater = fu < fh;
+							logger.finer( "FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
+							
+							/* Mark build as unstable */
+							if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+								logger.fine( "Build is unstable" );
+								health = 0.0f;
+							} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
+								float diff = fh - fu;
+								float nf1 = f - fu;
+								float inter = ( nf1 / diff ) * 100;
+	
+								logger.finer( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" + inter );
+	
+								if( inter < health ) {
+									logger.fine( "INTER: " + inter );
+									health = inter;
+								}
 							}
 						}
 					}
