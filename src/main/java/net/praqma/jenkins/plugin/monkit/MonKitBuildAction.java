@@ -95,14 +95,27 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		return categories;
 	}
 
-	/*
-	 * public void doIndex(StaplerRequest req, StaplerResponse rsp) throws
-	 * IOException { rsp.getOutputStream().println(
-	 * "Her kommer der noget herre fedt paa et tidspunkt...."); }
-	 */
-
 	public List<MonKitCategory> getMonKitCategories() {
 		return monkit;
+	}
+	
+	public MonKitCategory getMonKitCategory( String category ) {
+		for( MonKitCategory mkc : getMonKitCategories() ) {
+			if( mkc.getName().equalsIgnoreCase( category ) ) {
+				return mkc;
+			}
+		}		
+		return null;
+	}
+	
+	public MonKitObservation getMonKitObservation( MonKitCategory mkc, String name ) {
+		for( MonKitObservation mko : mkc ) {
+			if( mko.getName().equalsIgnoreCase( name ) ) {
+				return mko;
+			}
+		}
+		
+		return null;
 	}
 
 	public AbstractBuild<?, ?> getBuild() {
@@ -118,7 +131,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
 
 	/**
-	 * Gets the previous {@link CoberturaBuildAction} of the given build.
+	 * Gets the previous {@link MonKitBuildAction} of the given build.
 	 */
 	/* package */
 	static MonKitBuildAction getPreviousResult( AbstractBuild<?, ?> start ) {
@@ -139,6 +152,57 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 				return r;
 			}
 		}
+	}
+	
+	public MonKitTarget getMonkitTargetForCategory( String category ) {
+		return publisher.getTarget( category );
+	}
+	
+	public Float[] getThreshold( String category ) {
+		MonKitTarget mkt = publisher.getTarget( category );
+		
+		if( mkt != null ) {
+			Float fu = new Float( mkt.getUnstable() );
+			Float fh = new Float( mkt.getHealthy() );
+			
+			return new Float[]{fu,fh};
+		} else {
+			return null;
+		}
+	}
+	
+	public Float getHealthForCategory( String category, String name ) {
+		Float[] threshold = getThreshold( category );
+		if( threshold == null ) {
+			return 100.0f;
+		}
+		
+		Float fu = threshold[0];
+		Float fh = threshold[1];
+		
+		MonKitCategory mkc = getMonKitCategory( category );
+		MonKitObservation mko = getMonKitObservation( mkc, name );
+		
+		Float f;
+		try {
+			f = new Float( mko.getValue() );
+		} catch (NumberFormatException e) {
+			logger.warning( "[MonKitPlugin] Unknown number " + mko.getValue() );
+			return 100.0f;
+		}
+		
+		boolean isGreater = fu < fh;
+		
+		if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
+			return 0.0f;
+		} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
+			float diff = fh - fu;
+			float nf1 = f - fu;
+			float inter = ( nf1 / diff ) * 100;
+			return inter;
+		}
+		
+		return 100.0f;
 	}
 
 	public void doGraph( StaplerRequest req, StaplerResponse rsp ) throws IOException {

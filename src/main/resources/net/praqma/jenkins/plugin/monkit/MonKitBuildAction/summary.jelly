@@ -2,24 +2,58 @@
 	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
 	xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:u="/util">
 	
-	<tr><td colspan="2">
+	<tr><td colspan="2" style="width:100%" align="center">
 	<h1>${%MonKit Report}</h1>
 
 	<j:set var="monkit" value="${from.getMonKitCategories()}"/>
 
-	<table style="border-collapse:collapse;">
+	<table style="border-collapse:collapse;;width:100%">
 	<j:forEach var="mkc" items="${monkit}">
+		<j:set var="mkcname" value="${mkc.getName()}"/>
+		<j:set var="threshold" value="${from.getThreshold(mkcname)}"/>
+		
+		<j:choose>
+			<j:when test="${threshold==null}">
+				<j:set var="width" value="2" />
+			</j:when>
+			<j:otherwise>
+				<j:set var="width" value="3" />
+			</j:otherwise>
+		</j:choose>
+		
 		<tr>
-			<td align="center" style="border-bottom:solid;font-weight:bold;padding-right:15px;font-size:16" colspan="2">${mkc.getName()}</td>
+			<td align="center" style="border-bottom:solid;font-weight:bold;padding-right:15px;font-size:16" colspan="${width}">${mkc.getName()}</td>
 		</tr>
+			<tr>
+				<td style="border-bottom:solid;font-weight:bold;padding-right:15px">Host</td>
+				<td style="border-bottom:solid;font-weight:bold;padding-right:15px">Value,  <span style="font-size:9px;font-weight:normal">${mkc.getScale()}</span></td>
+				
+				<j:if test="${threshold!=null}">
+					<td style="border-bottom:solid;font-weight:bold;padding-right:15px" align="center">Health(u:${threshold[0]}/h:${threshold[1]})</td>
+				</j:if>
+			</tr>
 		<j:forEach var="mko" items="${mkc}">
 			<tr>
-				<td style="border-bottom:solid;font-weight:bold;padding-right:15px">${mko.getName()}:</td>
-				<td style="border-bottom:solid">${mko.getValue()} ${mko.getScale()}</td>
+				<td style="border-bottom:solid;border-bottom-width:1px;font-weight:bold;padding-right:15px">${mko.getName()}:</td>
+				<td style="border-bottom:solid;border-bottom-width:1px">${mko.getValue()}</td>
+				
+				<j:if test="${threshold!=null}">
+					<j:set var="health" value="${from.getHealthForCategory(mkcname, mko.getName())}"/>
+
+					<j:choose>
+						<j:when test="${health&lt;100.0}">
+							<td style="border-bottom:solid;border-bottom-width:1px;color:#000000;background:#990000" align="center">${health}%</td>
+						</j:when>
+						<j:otherwise>
+							<td style="border-bottom:solid;border-bottom-width:1px"></td>
+						</j:otherwise>
+					</j:choose>
+					
+				</j:if>
 			</tr>
 		</j:forEach>
 		<tr>
-			<td style="height:20px" colspan="2"> </td>
+			<td style="height:20px" colspan="{width}"> </td>
 		</tr>
 	</j:forEach>
 	</table>

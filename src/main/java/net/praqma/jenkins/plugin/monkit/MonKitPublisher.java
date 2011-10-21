@@ -122,7 +122,7 @@ public class MonKitPublisher extends Recorder {
     
     public MonKitTarget getTarget( String category ) {
     	for( MonKitTarget mkt : getTargets() ) {
-    		if( mkt.getCategory().equals(category) ) {
+    		if( mkt.getCategory().equals( category ) ) {
     			return mkt;
     		}
     	}
