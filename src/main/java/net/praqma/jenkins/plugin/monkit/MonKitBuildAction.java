@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
@@ -31,7 +28,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
 import hudson.model.Action;
 import hudson.model.HealthReport;
 import hudson.model.HealthReportingAction;
@@ -361,7 +357,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 				yaxis, // range axis label
 				dataset, // data
 				PlotOrientation.VERTICAL, // orientation
-				true, // include legend
+				!publisher.isDisableLegend(), // include legend
 				true, // tooltips
 				false // urls
 		);
@@ -369,7 +365,9 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		// NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
 
 		final LegendTitle legend = chart.getLegend();
-		legend.setPosition( RectangleEdge.RIGHT );
+		if( !publisher.isDisableLegend() ) {
+			legend.setPosition( RectangleEdge.RIGHT );
+		}
 
 		chart.setBackgroundPaint( Color.white );
 

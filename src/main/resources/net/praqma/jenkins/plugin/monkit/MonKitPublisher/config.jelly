@@ -8,6 +8,10 @@
        <f:checkbox name="monkit.onlyStable" checked="${instance.onlyStable}" />                                                                                        
     </f:entry>
     
+    <f:entry title="${%Disable legend}">
+       <f:checkbox name="monkit.disableLegend" checked="${instance.disableLegend}" />                                                                                        
+    </f:entry>
+    
     
     
    <f:entry title="${%Coverage Metric Targets}"

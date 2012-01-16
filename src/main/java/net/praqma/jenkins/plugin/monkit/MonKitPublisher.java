@@ -35,13 +35,15 @@ public class MonKitPublisher extends Recorder {
 	private String monKitFile = "monkit.xml";
 	public static final MonKitFilenameFilter __MONKIT_FILENAME_FILTER = new MonKitFilenameFilter();
 	private boolean onlyStable;
+	private boolean disableLegend = false;
 	
     private List<MonKitTarget> targets;
 	
     @DataBoundConstructor 
-    public MonKitPublisher( String monKitFile, boolean onlyStable ) {
+    public MonKitPublisher( String monKitFile, boolean onlyStable, boolean disableLegend ) {
         this.monKitFile = monKitFile;
         this.onlyStable = onlyStable;
+        this.disableLegend = disableLegend;
         
         targets = new ArrayList<MonKitTarget>();
     }
@@ -114,6 +116,10 @@ public class MonKitPublisher extends Recorder {
     
     public boolean isOnlyStable() {
     	return onlyStable;
+    }
+    
+    public boolean isDisableLegend() {
+    	return disableLegend;
     }
     
     public List<MonKitTarget> getTargets() {
