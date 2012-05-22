@@ -21,10 +21,10 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -49,7 +49,10 @@ public class MonKitPublisher extends Recorder {
     }
 	
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		Hudson.getInstance().getComputers();
+		
+		String version = Hudson.getInstance().getPlugin( "drmemory-plugin" ).getWrapper().getVersion();
+		listener.getLogger().println( "MonKit Plugin version " + version );
+		
         final FilePath[] moduleRoots = build.getModuleRoots();
         final boolean multipleModuleRoots = moduleRoots != null && moduleRoots.length > 1;
         final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();
