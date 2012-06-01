@@ -47,10 +47,11 @@ public class MonKitPublisher extends Recorder {
         
         targets = new ArrayList<MonKitTarget>();
     }
-	
+    
+    @Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		
-		String version = Hudson.getInstance().getPlugin( "drmemory-plugin" ).getWrapper().getVersion();
+		String version = Hudson.getInstance().getPlugin( "monkit-plugin" ).getWrapper().getVersion();
 		listener.getLogger().println( "MonKit Plugin version " + version );
 		
         final FilePath[] moduleRoots = build.getModuleRoots();
