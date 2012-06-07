@@ -1,13 +1,15 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
-
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">  
+    
     <j:set var="lastResult" value="${from.lastResult}"/>
     <j:if test="${lastResult != null}">
         <j:choose>
             <j:when test="${lastResult.previousResult != null}">
+            <div id="chart_div" style="width:100%; float:right; padding:5px;">
             	<j:forEach var="unit" items="${lastResult.getCategories()}">
-                        <img src="${from.urlName}/graph?category=${unit}"/>
-	            </j:forEach>
+                   <div id="${unit}" style="width: 480px; height: 300px; float:left;"/>
+	            </j:forEach>              
+            </div>    
             </j:when>
             <j:otherwise>
                 <div style="border: 1px solid #eee; ">
@@ -16,5 +18,49 @@
 	            
             </j:otherwise>
         </j:choose>
+
     </j:if>
+    
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("prototype", "1.7.0.0");</script>
+    
+
+    <!--
+        But we need to load Prototype for the API.
+        
+        http://www.saschakimmel.com/2009/05/tutorial-how-to-use-prototypejs-on-your-site/
+        
+        http://stackoverflow.com/questions/7759231/google-charts-errorcannot-read-property-length-of-undefined-debugging-error
+           
+    -->
+    <script type="text/javascript">
+        Array.prototype.reduce = undefined;
+    </script>
+    <script type="text/javascript">
+      
+      google.load('visualization', '1.0', {'packages':['corechart']});
+      google.setOnLoadCallback(function() {
+            var res = ${from.getAllGraphData()};
+            drawChart2(${lastResult.getCategoryString()}, res);
+      });
+    
+    function drawChart2(categories, data) {
+        for(var i=0; i&lt;categories.length; i++) {
+            var mydata = categories[i];
+            var graphdata = google.visualization.arrayToDataTable(data[i]);
+            line_chart = new google.visualization.LineChart(document.getElementById(mydata));
+            line_chart.draw(graphdata, {curveType: "none",
+                  width: 480, height: 300,
+                  legend: {position: 'right'},
+                  title: categories[i],
+                  hAxis: {title: 'Build number'},
+                  vAxis: {maxValue: 10}}
+          );
+        }
+    }
+    
+    </script>
+    
+    
+    
 </j:jelly>

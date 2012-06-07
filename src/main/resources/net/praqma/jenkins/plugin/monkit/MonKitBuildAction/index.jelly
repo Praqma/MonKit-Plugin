@@ -4,13 +4,11 @@
 	<l:layout title="Rebuild" norefresh="true">
 		<l:side-panel>
 			<l:tasks>
-				<l:task icon="images/24x24/up.gif" href="${rootURL}/" title="${%Back to Dashboard}" />
-      			
+				<l:task icon="images/24x24/up.gif" href="${rootURL}/" title="${%Back to Dashboard}" />	
 			</l:tasks>
 		</l:side-panel>
 		<l:main-panel>
-			<st:include page="main.jelly" /><!-- Including main.jelly -->
-			<!-- Something for the main panel -->
+			<st:include page="main.jelly" /><
 		</l:main-panel>
 	</l:layout>
 </j:jelly>

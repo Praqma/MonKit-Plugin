@@ -36,6 +36,9 @@ import hudson.util.ChartUtil;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
 import hudson.util.ShiftedCategoryAxis;
+import java.util.HashMap;
+import net.sf.json.JSONArray;
+import net.sf.json.JsonConfig;
 
 public class MonKitBuildAction implements HealthReportingAction, Action {
 
@@ -56,19 +59,23 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	public void setPublisher( MonKitPublisher publisher ) {
 		this.publisher = publisher;
 	}
-
+    
+    @Override
 	public String getDisplayName() {
 		return "MonKit";
 	}
-
+    
+    @Override
 	public String getIconFileName() {
 		return "graph.gif";
 	}
 
+    @Override
 	public String getUrlName() {
 		return "monkit";
 	}
-
+    
+    @Override
 	public HealthReport getBuildHealth() {
 		Case worst = publisher.getWorst( monkit );
 
@@ -85,11 +92,22 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	public List<String> getCategories() {
 		List<String> categories = new ArrayList<String>();
 		for( MonKitCategory mkc : monkit ) {
-			categories.add( mkc.getName() );
+            categories.add( mkc.getName() );
 		}
 
 		return categories;
 	}
+    
+    public String getCategoryString() {
+        String result = "[";
+        for(String s : getCategories()) {
+            result+="\""+s+"\""+",";
+        }
+     
+        result+= "]";
+        return result;
+    }
+
 
 	public List<MonKitCategory> getMonKitCategories() {
 		return monkit;
@@ -200,7 +218,80 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		
 		return 100.0f;
 	}
+   
+    /**
+     * Calculates the observations x index in the graph data point. 
+     * @param category
+     * @return 
+     */
+    public HashMap<String, Integer> graphIndex(String category) {
+        HashMap<String, Integer> index = new HashMap<String, Integer>();
+        int offset = 1;
+        for( MonKitBuildAction a = this; a != null; a = a.getPreviousResult() ) {
+            for( MonKitCategory mkc : a.getMonKitCategories() ) {
+                if( mkc.getName().equalsIgnoreCase( category ) ) {
+                    for(MonKitObservation mko : mkc) {
+                        if(!index.containsKey(mko.getName())) {
+                            index.put(mko.getName(), offset);
+                            offset++;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return index;
+    }
 
+    public JSONArray graphData(String category) {
+        JSONArray jso = new JSONArray();
+
+        HashMap<String, Integer> indexes = graphIndex(category);
+        
+        /**
+         * Why we are adding 1: The cardinality returns the number of observations (total number of plottable data). We need to add build number also as part of the data point.
+         * 
+         * X - axis
+         */
+        int cardinality = indexes.values().size()+1;       
+
+        Object[] header = new Object[cardinality];
+        header[0] = "build";
+        for(String key : indexes.keySet()) {
+            header[indexes.get(key)] = key;
+        }
+        jso.add(0, header);
+        
+        /**
+         * We start with data at 1. 
+         */
+        int i = 1;
+        for( MonKitBuildAction a = this; a != null; a = a.getPreviousResult() ) {
+            Object[] values = new Object[cardinality];
+            for( MonKitCategory mkc : a.getMonKitCategories() ) {
+                if( mkc.getName().equalsIgnoreCase( category ) ) {
+                    
+                    values[0] = a.build.number; 
+                    
+                    for(MonKitObservation mko : mkc) {
+                        String val = mko.getValue();
+                        int index = indexes.get(mko.getName());
+                        if(val == null || val.equals("null"))
+                            values[index] = null;
+                        else
+                            values[index] = Double.parseDouble(val);
+                    }
+                    
+                } 
+            }
+            jso.add(i, values);
+            i++;            
+        }
+        
+        return jso;
+    }
+    
+   
 	public void doGraph( StaplerRequest req, StaplerResponse rsp ) throws IOException {
 		String category = req.getParameter( "category" );
 		
@@ -216,8 +307,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		if( h != null && h.length() > 0 ) {
 			height = Integer.parseInt( h );
 		}
-
-		// System.out.println("I got cat " + category);
+        
 		if( category == null ) {
 			throw new IOException( "No type given" );
 		}

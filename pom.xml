@@ -40,7 +40,7 @@
         
         <repository>
             <id>praqma-repo</id>
-            <url>http://code.praqma.net/repo/maven/</url>
+            <url>artifactory.praqma.net:8081</url>
         </repository>
     </repositories>
 
@@ -120,7 +120,7 @@
 		<dependency>
 			<groupId>net.praqma</groupId>
 			<artifactId>monkit</artifactId>
-			<version>0.1.8</version>
+			<version>0.1.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	

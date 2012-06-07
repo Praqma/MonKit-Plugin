@@ -5,18 +5,62 @@
 
 		<l:main-panel>
 		    <j:set var="lastResult" value="${it.lastResult}"/>
-		    
 		    <j:if test="${lastResult != null}">
 		        <j:choose>
+                    <!--
 	            	<j:forEach var="unit" items="${lastResult.getCategories()}">
-	                        <img src="graph?category=${unit}&amp;width=800&amp;height=300"/>
+	                        <img src="graph?category=${unit}&amp;with=800&amp;height=300"/>
 		            </j:forEach>
+                    -->
+                <div id="chart_div" style="width:1000px;">
+            	<j:forEach var="unit" items="${lastResult.getCategories()}">
+                   <div id="${unit}" style="width: 500px; height: 300px; float:left;"/>
+	            </j:forEach>
+              
+            </div>   
 		        </j:choose>
 		    </j:if>
 			        
 
 		</l:main-panel>
 	</l:layout>
+     
+     
+    <!--
+        We need to load Prototype for the API.
+        
+        http://www.saschakimmel.com/2009/05/tutorial-how-to-use-prototypejs-on-your-site/
+        
+        http://stackoverflow.com/questions/7759231/google-charts-errorcannot-read-property-length-of-undefined-debugging-error
+           
+    -->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("prototype", "1.7.0.0");</script>
+    <script type="text/javascript">
+        Array.prototype.reduce = undefined;
+    </script>
+    <script type="text/javascript">
+      
+      google.load('visualization', '1.0', {'packages':['corechart']});
+      google.setOnLoadCallback(function() {
+            var res = ${it.getAllGraphData()};
+            drawChart(${it.lastResult.getCategoryString()}, res);
+      });
+    
+    function drawChart(categories, data) {
+        for(var i=0; i&lt;categories.length; i++) {
+            var mydata = categories[i];
+            var graphdata = google.visualization.arrayToDataTable(data[i]);
+            line_chart = new google.visualization.LineChart(document.getElementById(mydata));
+            line_chart.draw(graphdata, {curveType: "none",
+                  width: 480, height: 300,
+                  hAxis: {title: 'Build number'},
+                  vAxis: {maxValue: 10, title: categories[i]}}
+          );
+        }
+    }
+    
+    </script>
 </j:jelly>
 
 

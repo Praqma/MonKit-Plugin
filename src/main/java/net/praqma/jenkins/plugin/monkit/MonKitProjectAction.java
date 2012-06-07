@@ -1,8 +1,6 @@
 package net.praqma.jenkins.plugin.monkit;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -12,6 +10,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Actionable;
 import hudson.model.ProminentProjectAction;
 import hudson.model.Result;
+import net.sf.json.JSONArray;
 
 public class MonKitProjectAction extends Actionable implements ProminentProjectAction {
 
@@ -23,18 +22,22 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         this.onlyStable = onlyStable;
     }
 	
+    @Override
 	public String getDisplayName() {
 		return "MonKit";
 	}
 
+    @Override
 	public String getSearchUrl() {
 		return getUrlName();
 	}
 
+    @Override
 	public String getIconFileName() {
 		return "graph.gif";
 	}
 
+    @Override
 	public String getUrlName() {
 		return "monkit";
 	}
@@ -45,14 +48,27 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         }
     }
     
-    /*
-    public void doIndex(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    	rsp.getOutputStream().println("Her kommer der noget herre fedt paa et tidspunkt....");
+    public JSONArray getGraphData(String cat) {
+        if (getLastResult() != null) {
+            return getLastResult().graphData(cat);
+        }
+        return null;
     }
-    */
     
-    public void doSnade(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        rsp.getOutputStream().println("Hej, mand!");
+    public JSONArray getAllGraphData() {
+            
+        if (getLastResult() != null) {
+            int size = getLastResult().getCategories().size();
+            JSONArray arrays = new JSONArray();
+            int i = 0;
+            for(String cat : getLastResult().getCategories()) {
+                arrays.add(getLastResult().graphData(cat));
+                i++;
+            }
+            return arrays;
+            
+        }
+        return null;
     }
     
     public MonKitBuildAction getLastResult() {

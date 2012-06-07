@@ -65,17 +65,22 @@ public class MonKitPublisher extends Recorder {
 
             // if the build has failed, then there's not
             // much point in reporting an error
-            if (build.getResult().isWorseOrEqualTo(Result.FAILURE) && reports.length == 0)
-                return true;
+            if (build.getResult().isWorseOrEqualTo(Result.FAILURE) && reports.length == 0) {
+                listener.getLogger().println("Build failed, nothing to report");
+                return false;
+            }
 
         } catch (IOException e) {
             Util.displayIOException(e, listener);
             e.printStackTrace(listener.fatalError("Unable to find MonKit files"));
             build.setResult(Result.FAILURE);
+            listener.getLogger().println("Caught IOException, marking build as failed");
         }
         
         List<MonKit> mks = new ArrayList<MonKit>();
         
+        listener.getLogger().println(String.format("Found %s reports", reports.length));
+         
         for (int i = 0; i < reports.length; i++) {
         	try {
 				MonKit mke = MonKit.fromString( reports[i].readToString() );
@@ -92,19 +97,27 @@ public class MonKitPublisher extends Recorder {
         build.getActions().add(mka);
         
         Case worst = getWorst(mk.getCategories());
-        
+       
         if(worst.health == null) {
         	build.setResult(Result.UNSTABLE);
+        }
+         
+        if(mk.isAllCategoriesEmpty()) {
+            listener.getLogger().println(String.format("Didn't find any readings across all categories, failing build!"));
+            return false;
+            
         }
 		
 		return true;
 	}
-	
+    
+	@Override
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.BUILD;
 	}
 	
     private static class MonKitFilenameFilter implements FilenameFilter {
+        @Override
         public boolean accept(File dir, String name) {
             return name.matches("^monkit.*\\.xml$");
         }
@@ -241,6 +254,7 @@ public class MonKitPublisher extends Recorder {
     
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        @Override
 		public String getDisplayName() {
 			return "MonKit Report";
 		}
