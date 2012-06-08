@@ -1,16 +1,10 @@
 package net.praqma.jenkins.plugin.monkit;
 
+import hudson.model.*;
 import java.io.IOException;
-
+import net.sf.json.JSONArray;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Actionable;
-import hudson.model.ProminentProjectAction;
-import hudson.model.Result;
-import net.sf.json.JSONArray;
 
 public class MonKitProjectAction extends Actionable implements ProminentProjectAction {
 
@@ -55,14 +49,13 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         return null;
     }
     
-    public JSONArray getAllGraphData() {
-            
+    public JSONArray getAllGraphData() {           
         if (getLastResult() != null) {
-            int size = getLastResult().getCategories().size();
+            MonKitBuildAction mba = getLastResult();
             JSONArray arrays = new JSONArray();
             int i = 0;
-            for(String cat : getLastResult().getCategories()) {
-                arrays.add(getLastResult().graphData(cat));
+            for(String cat : mba.getCategories()) {
+                arrays.add(mba.graphData(cat));
                 i++;
             }
             return arrays;
