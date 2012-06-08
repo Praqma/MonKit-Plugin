@@ -224,7 +224,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
      * @param category
      * @return 
      */
-    public HashMap<String, Integer> graphIndex(String category) {
+    public HashMap<String, Integer> graphIndex(String category, MonKitTarget target) {
         HashMap<String, Integer> index = new HashMap<String, Integer>();
         int offset = 1;
         for( MonKitBuildAction a = this; a != null; a = a.getPreviousResult() ) {
@@ -240,26 +240,42 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             }
         }
         
+        if(target != null) {
+            if(target.getHealthy() != null) {
+                index.put("<Healthy>", offset);
+                offset++;        
+            } 
+            if(target.getUnstable() != null) {
+                index.put("<Unstable>", offset);
+                offset++;
+            }
+        }
+        
         return index;
     }
 
-    public JSONArray graphData(String category) {
+    public JSONArray graphData(String category, MonKitTarget target) {
         JSONArray jso = new JSONArray();
 
-        HashMap<String, Integer> indexes = graphIndex(category);
+        HashMap<String, Integer> indexes = graphIndex(category, target);
         
         /**
          * Why we are adding 1: The cardinality returns the number of observations (total number of plottable data). We need to add build number also as part of the data point.
          * 
          * X - axis
          */
-        int cardinality = indexes.values().size()+1;       
+        int cardinality = indexes.values().size()+1;
+        
+        //Check to see if there are any coverage-metric targets for the given category:
+        
+        
 
         Object[] header = new Object[cardinality];
         header[0] = "build";
         for(String key : indexes.keySet()) {
             header[indexes.get(key)] = key;
         }
+
         jso.add(0, header);
         
         /**
@@ -270,24 +286,34 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
             Object[] values = new Object[cardinality];
             for( MonKitCategory mkc : a.getMonKitCategories() ) {
                 if( mkc.getName().equalsIgnoreCase( category ) ) {
-                    
+                    Integer unhealtyIndex = indexes.get("<Unstable>");
+                    Integer healthyIndex = indexes.get("<Healthy>");
                     values[0] = a.build.number; 
                     
                     for(MonKitObservation mko : mkc) {
                         String val = mko.getValue();
                         int index = indexes.get(mko.getName());
-                        if(val == null || val.equals("null"))
+                        
+                        if(val == null || val.equals("null")) {
                             values[index] = null;
-                        else
+                        } else {
                             values[index] = Double.parseDouble(val);
+                        }
+   
+                        if(target != null) {
+                            if(unhealtyIndex != null)
+                                values[unhealtyIndex] = target.getUnstable().doubleValue();
+                            if(healthyIndex != null)                            
+                                values[healthyIndex] = target.getHealthy().doubleValue();
+                        }
                     }
-                    
                 } 
             }
+            
             jso.add(i, values);
             i++;            
         }
-        
+ 
         return jso;
     }
     

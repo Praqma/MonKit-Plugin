@@ -42,9 +42,9 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         }
     }
     
-    public JSONArray getGraphData(String cat) {
+    public JSONArray getGraphData(String cat, MonKitTarget target) {
         if (getLastResult() != null) {
-            return getLastResult().graphData(cat);
+            return getLastResult().graphData(cat,target);
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
             JSONArray arrays = new JSONArray();
             int i = 0;
             for(String cat : mba.getCategories()) {
-                arrays.add(mba.graphData(cat));
+                arrays.add(mba.graphData(cat, mba.getMonkitTargetForCategory(cat)));
                 i++;
             }
             return arrays;
