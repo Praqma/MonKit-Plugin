@@ -8,7 +8,7 @@
 			</l:tasks>
 		</l:side-panel>
 		<l:main-panel>
-			<st:include page="main.jelly" /><
+			<st:include page="main.jelly" />
 		</l:main-panel>
 	</l:layout>
 </j:jelly>
