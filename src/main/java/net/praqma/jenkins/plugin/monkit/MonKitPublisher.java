@@ -169,13 +169,13 @@ public class MonKitPublisher extends Recorder {
     }
     
     public class Case {
-    	Float health = 100f;
+    	Double health = 100d;
     	String category = "";
     	String name = "";
     	
     	public Case() {}
     	
-    	public Case( Float health, String category, String name ) {
+    	public Case( Double health, String category, String name ) {
     		this.health = health;
     		this.category = category;
     		this.name = name;
@@ -201,14 +201,12 @@ public class MonKitPublisher extends Recorder {
 					for( MonKitObservation mko : mkc ) {
 						
 						/* Calculate health */
-						Float f = new Float( mko.getValue() );
+						Double f = new Double( mko.getValue() );
 						
-						Float fu = new Float( mkt.getUnstable() );
-						Float fh = new Float( mkt.getHealthy() );
+						Double fu = new Double( mkt.getUnstable() );
+						Double fh = new Double( mkt.getHealthy() );
 						
 						boolean isGreater = fu < fh;
-						
-						//System.out.println( "F=" + f + ". FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
 						
 						/* Mark build as unstable */
 						if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
@@ -216,17 +214,12 @@ public class MonKitPublisher extends Recorder {
 						}
 						
 						if( ( isGreater && f < fh ) || (  !isGreater && f > fh ) ) {
-							float diff = fh - fu;
-							float nf1 = f - fu;
-							float inter = ( nf1 / diff ) * 100;
-							
-							//System.out.println( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" +  inter );
-							
-							//System.out.println( "INTER=" +  inter );
-							
+							double diff = fh - fu;
+							double nf1 = f - fu;
+							double inter = ( nf1 / diff ) * 100;
+
 							if( inter < worst.health ) {
 								worst.health = inter;
-								//worstStr = mkc.getName() + " for " + mko.getName();
 								worst.category = mkc.getName();
 								worst.name = mko.getName();
 							}
@@ -238,7 +231,7 @@ public class MonKitPublisher extends Recorder {
 		}
 		
 		if( healthy ) {
-			return new Case( 100f, null, null );
+			return new Case( 100d, null, null );
 		} else {
 			return worst;
 		}

@@ -1,8 +1,8 @@
 package net.praqma.jenkins.plugin.monkit;
 
 public class MonKitTarget {
-	private Integer healthy;
-	private Integer unstable;
+	private Long healthy;
+	private Long unstable;
 	
 	private String category;
 	
@@ -10,25 +10,25 @@ public class MonKitTarget {
 		
 	}
 	
-	public MonKitTarget( String category, Integer healthy, Integer unhealthy, Integer unstable ) {
+	public MonKitTarget( String category, Long healthy, Long unhealthy, Long unstable ) {
 		this.category  = category;
 		this.healthy   = healthy;
 		this.unstable  = unstable;
 	}
 	
-    public Integer getHealthy() {
+    public Long getHealthy() {
         return healthy == null ? 80 : healthy;
     }
 
-    public void setHealthy(Integer healthy) {
+    public void setHealthy(Long healthy) {
         this.healthy = healthy;
     }
 
-    public Integer getUnstable() {
+    public Long getUnstable() {
         return unstable == null ? 0 : unstable;
     }
 
-    public void setUnstable(Integer unstable) {
+    public void setUnstable(Long unstable) {
         this.unstable = unstable;
     }
 

@@ -172,51 +172,51 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 		return publisher.getTarget( category );
 	}
 	
-	public Float[] getThreshold( String category ) {
+	public Double[] getThreshold( String category ) {
 		MonKitTarget mkt = publisher.getTarget( category );
 		
 		if( mkt != null ) {
-			Float fu = new Float( mkt.getUnstable() );
-			Float fh = new Float( mkt.getHealthy() );
+			Double fu = new Double( mkt.getUnstable() );
+			Double fh = new Double( mkt.getHealthy() );
 			
-			return new Float[]{fu,fh};
+			return new Double[]{fu,fh};
 		} else {
 			return null;
 		}
 	}
 	
-	public Float getHealthForCategory( String category, String name ) {
-		Float[] threshold = getThreshold( category );
+	public Double getHealthForCategory( String category, String name ) {
+		Double[] threshold = getThreshold( category );
 		if( threshold == null ) {
-			return 100.0f;
+			return 100.0d;
 		}
 		
-		Float fu = threshold[0];
-		Float fh = threshold[1];
+		Double fu = threshold[0];
+		Double fh = threshold[1];
 		
 		MonKitCategory mkc = getMonKitCategory( category );
 		MonKitObservation mko = getMonKitObservation( mkc, name );
 		
-		Float f;
+		Double f;
 		try {
-			f = new Float( mko.getValue() );
+			f = new Double( mko.getValue() );
 		} catch (NumberFormatException e) {
 			logger.warning( "[MonKitPlugin] Unknown number " + mko.getValue() );
-			return 100.0f;
+			return 100.0d;
 		}
 		
 		boolean isGreater = fu < fh;
 		
 		if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
-			return 0.0f;
+			return 0.0d;
 		} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
-			float diff = fh - fu;
-			float nf1 = f - fu;
-			float inter = ( nf1 / diff ) * 100;
+			double diff = fh - fu;
+			double nf1 = f - fu;
+			double inter = ( nf1 / diff ) * 100;
 			return inter;
 		}
 		
-		return 100.0f;
+		return 100.0d;
 	}
    
     /**
@@ -292,12 +292,12 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
                     
                     for(MonKitObservation mko : mkc) {
                         String val = mko.getValue();
-                        int index = indexes.get(mko.getName());
+                        long index = indexes.get(mko.getName());
                         
                         if(val == null || val.equals("null")) {
-                            values[index] = null;
+                            values[(int)index] = null;
                         } else {
-                            values[index] = Double.parseDouble(val);
+                            values[(int)index] = Double.parseDouble(val);
                         }
    
                         if(target != null) {
@@ -352,7 +352,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 
 		DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel>();
 
-		float health = 100.0f;
+		double health = 100.0d;
 		int min = 1000000, max = -110001100;
 		String scale = "Unknown";
 
@@ -374,11 +374,11 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 					/**/
 					MonKitTarget mkt = publisher.getTarget( category );
 
-					Float fu = null;
-					Float fh = null;
+					Double fu = null;
+					Double fh = null;
 					if( mkt != null ) {
-						fu = new Float( mkt.getUnstable() );
-						fh = new Float( mkt.getHealthy() );
+						fu = new Double( mkt.getUnstable() );
+						fh = new Double( mkt.getHealthy() );
 
 						dsb.add( fh, "<Healthy>", label );
 						if( max < fh ) {
@@ -390,15 +390,12 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 							min = (int) Math.floor( fu );
 						}
 					}
-					
-					logger.finer( "float unstable: " + fu );
-					logger.finer( "float health: " + fh );
 
 					/* Loop the observations */
-					Float f = 0f;
+					Double f = 0d;
 					for( MonKitObservation mko : mkc ) {
 						try {
-							f = new Float( mko.getValue() );
+							f = new Double( mko.getValue() );
 						} catch (NumberFormatException e) {
 							System.err.println( "[MonKitPlugin] Unknown number " + mko.getValue() );
 							continue;
@@ -430,21 +427,16 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 						 */
 						if( latest && mkt != null ) {
 							boolean isGreater = fu < fh;
-							logger.finer( "FU=" + fu + ". FH=" + fh + ". ISGREATER=" + isGreater );
-							
 							/* Mark build as unstable */
 							if( ( isGreater && f < fu ) || ( !isGreater && f > fu ) ) {
 								logger.fine( "Build is unstable" );
 								health = 0.0f;
 							} else if( ( isGreater && f < fh ) || ( !isGreater && f > fh ) ) {
-								float diff = fh - fu;
-								float nf1 = f - fu;
-								float inter = ( nf1 / diff ) * 100;
-	
-								logger.finer( "DIFF=" + diff + ". NF1=" + nf1 + ". INTER=" + inter );
+								double diff = fh - fu;
+								double nf1 = f - fu;
+								double inter = ( nf1 / diff ) * 100;
 	
 								if( inter < health ) {
-									logger.fine( "INTER: " + inter );
 									health = inter;
 								}
 							}
