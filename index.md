@@ -37,12 +37,12 @@ The formation of the xml can be eased with a small tool, MonKit, which is writte
 
 The charts looks like this:
 
-![Disk](/images/disk.png){: .pic .center .large }
-![Memory](/images/memory.png){: .pic .center .large }
+![Disk](images/disk.png){: .pic .center .large }
+![Memory](images/memory.png){: .pic .center .large }
 
 As an additional feature, MonKit plugin can set the build health. This can be configured like this:
 
-![Memory](/images/configure2.png){: .pic .center .large }
+![Memory](images/configure2.png){: .pic .center .large }
 
 This should be read as, the category "disk" is at full health at 75 or above and unstable at 50 and below. The values between these two numbers are interpolated to a build health percentage.
 
