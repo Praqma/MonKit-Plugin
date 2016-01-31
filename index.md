@@ -17,21 +17,22 @@ The basic format is given as a set of categories, which contains a set of observ
 
 For example:
 
-
-    <categories>
-      <category name="memory" scale="mb">
-        <observations>
-          <observation name="Server 1">100</observation>
-          <observation name="Server 2">200</observation>
-        </observations>
-      </category>
-      <category name="disk" scale="gb">
-        <observations>
-          <observation name="Server 1">41</observation>
-          <observation name="Server 2">58</observation>
-        </observations>
-      </category>
-    </categories>
+{% highlight xml %}
+<categories>
+  <category name="memory" scale="mb">
+    <observations>
+      <observation name="Server 1">100</observation>
+      <observation name="Server 2">200</observation>
+    </observations>
+  </category>
+  <category name="disk" scale="gb">
+    <observations>
+      <observation name="Server 1">41</observation>
+      <observation name="Server 2">58</observation>
+    </observations>
+  </category>
+</categories>
+{% endhighlight %}
 
 The formation of the xml can be eased with a small tool, MonKit, which is written in java and can be found at [github](https://github.com/Praqma/MonKit).
 
@@ -54,25 +55,25 @@ For now there's only an API for Java.
 ### Java
 MonKit can be included in your Maven project if you include our repository in the distributionManagement section and the dependency in the dependencies section - like this:
 
-    <repositories>
-      <repository>
-        <id>praqma</id>
-        <name>praqma</name>
-        <url>http://code.praqma.net/repo/maven</url>
-      </repository>
-      ...
-    </repositories>
-
-    ...
-
-    <dependencies>
-      <dependency>
-        <groupId>net.praqma</groupId>
-        <artifactId>monkit</artifactId>
-        <version>0.1.6</version>
-      </dependency>
-      ...
-    </dependencies>
+{%highlight xml%}
+<repositories>
+  <repository>
+    <id>praqma</id>
+    <name>praqma</name>
+    <url>http://code.praqma.net/repo/maven</url>
+  </repository>
+  ...
+</repositories>
+...
+<dependencies>
+  <dependency>
+    <groupId>net.praqma</groupId>
+    <artifactId>monkit</artifactId>
+    <version>0.1.6</version>
+  </dependency>
+  ...
+</dependencies>
+{% endhighlight %}
 
 The API works as follows:
 
@@ -88,52 +89,58 @@ The filename can be given as a File argument to the constructor or `save()`.
 
 Two static methods are available to generate MonKit instances:
 
-    fromString(String)
-    where:
-      String      is a velformed valid MonKit xml String
+{% highlight java %}
+fromString(String);
+where:
+  String is a velformed valid MonKit xml String
+{% endhighlight %}
 
-    fromXML(File)
-    Where:
-      File points to a velformed valid MonKit xml File
+{% highlight java %}
+fromXML(File)
+Where:
+  File points to a velformed valid MonKit xml File
+{% endhighlight %}
 
 To exemplify:
 
-    MonKit mk = new MonKit();
-    mk.addCategory("category", "scale");
-    mk.add("name", "1", "category");
-    mk.save();
+{% highlight java %}
+MonKit mk = new MonKit();
+mk.addCategory("category", "scale");
+mk.add("name", "1", "category");
+mk.save();
+{% endhighlight %}
 
 The previous code will produce a file called monkit.xml in the current working directory.
 
 The following code will produce three MonKit instances, merge them, create a final instance and save it to `myfile.xml` in the current working directory.
 
-    MonKit mk1 = MonKit.fromString("
-    <categories>
-      <category name=\"category\" scale=\"scale\">
-        <observation name=\"name1\">7</observation>
-        <observation name=\"name2\">10</observation>
-      </category><category name=\"category2\" scale=\"scale2\"/>
-    </categories>
-    " );
-    MonKit mk2 = MonKit.fromString("
-    <categories>
-      <category name=\"category\" scale=\"scale\">
-        <observation name=\"name1\">8</observation>
-        <observation name=\"name4\">11</observation>
-      </category><category name=\"category2\" scale=\"scale2\"/>
-    </categories>
-    " );
-    MonKit mk3 = MonKit.fromString("
-    <categories>
-      <category name=\"category2\" scale=\"scale\">
-        <observation name=\"name44\">9</observation>
-        <observation name=\"name22222\">12</observation>
-      </category>
-    </categories>
-    " );
-
-    MonKit mk = MonKit.merge(mk1,mk2,mk3);
-
-    mk.save(new File("myfile.xml"));
+{% highlight java %}
+MonKit mk1 = MonKit.fromString("
+<categories>
+  <category name=\"category\" scale=\"scale\">
+    <observation name=\"name1\">7</observation>
+    <observation name=\"name2\">10</observation>
+  </category><category name=\"category2\" scale=\"scale2\"/>
+</categories>
+" );
+MonKit mk2 = MonKit.fromString("
+<categories>
+  <category name=\"category\" scale=\"scale\">
+    <observation name=\"name1\">8</observation>
+    <observation name=\"name4\">11</observation>
+  </category><category name=\"category2\" scale=\"scale2\"/>
+</categories>
+" );
+MonKit mk3 = MonKit.fromString("
+<categories>
+  <category name=\"category2\" scale=\"scale\">
+    <observation name=\"name44\">9</observation>
+    <observation name=\"name22222\">12</observation>
+  </category>
+</categories>
+" );
+MonKit mk = MonKit.merge(mk1,mk2,mk3);
+mk.save(new File("myfile.xml"));
+{% endhighlight %}
 
 The Javadoc can be seen at [http://code.praqma.com/monkit-plugin/javadoc](http://code.praqma.com/monkit-plugin/javadoc])
