@@ -1,0 +1,11 @@
+# Site settings
+title: MonKit by Praqma
+tag_text: MonKit Plugin for Jenkins CI
+description: A kit that will enable you to display any data you collect as graphs in Jenkins
+
+# Build settings
+markdown: kramdown
+highlighter: pygments
+exclude: ["README.md"]
+sass:
+  style: compressed

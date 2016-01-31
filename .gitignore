@@ -4,3 +4,5 @@
 target/
 build/
 work/
+*/_site/
+*/\.sass-cache/

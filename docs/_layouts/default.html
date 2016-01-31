@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="description" content="{{ site.description }}">
+  <title>{{ site.title }}</title>
+
+{% include head.html %}
+</head>
+<body>
+  <div class="container">
+    <h1><a href="./">{{ site.tag_text }}</a></h1>
+    {% include github.html %}
+    {{ content }}
+  </div>
+{% include scripts.html %}
+</body>
+</html>
