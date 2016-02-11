@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="categories">
+	<xs:complexType>
+		<xs:sequence>
+			
+			<!-- Zero or more category elements -->
+			<xs:element name="category" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+				      	
+					<xs:sequence>
+						<!-- Exactly one observations element pr category -->
+						<xs:element name="observations" maxOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<!-- Zero or more observation elements -->
+			    					<xs:element name="observation" type="observation" minOccurs="0" maxOccurs="unbounded"/>
+			    				</xs:sequence>
+		    				</xs:complexType>
+		    			</xs:element>
+	    			</xs:sequence>
+	    			
+	    			<!-- Definition of the attributes for category -->
+	    			<xs:attribute name="name" type="xs:string" use="required"/>
+	    			<xs:attribute name="scale" type="xs:string" use="required"/>
+	    			    			
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+
+<!-- Definition of the observation element -->
+<xs:complexType name="observation">
+    <xs:simpleContent>
+    	<!-- Currently only decimal numbers are allowed -->
+     	<xs:extension base="xs:decimal">
+      		<xs:attribute name="name" type="xs:string" use="required"/>
+      	</xs:extension>
+    </xs:simpleContent>
+</xs:complexType>
+	
+
+</xs:schema>
