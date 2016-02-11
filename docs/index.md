@@ -1,13 +1,17 @@
 ---
-layout: default
-organization: praqma
-repo: monkit-plugin
+layout:            default
+organization:      Praqma
+repo:              MonKit-Plugin
+github-issues:     true
+javadoc:           true
+jenkins-component: monkit-plugin
+jenkins-jira:      monkit
 ---
 
-The MonKit plugin is used to display charts of data delivered in XML compliant with [monkit.xsd](http://code.praqma.net/schemas/monkit/1.0.1/monkit.xsd). Monkit also has a small Java API you can use to produce the XML.
+The MonKit plugin is used to display charts of data delivered in XML compliant with [monkit.xsd](schemas/1.0.1/monkit.xsd). Monkit also has a small Java API you can use to produce the XML.
 {: .cuff}
 
-For clients who wish to see the graphs produced by MonKit. Access to google API site is required. Since it uses the graphing engine to create the charts. If you do not have access to the internet from the machine you're browsing the job, you can use version 0.2.4
+This plugin uses Googles graphing engine. Your Jenkins master should be able to access google's API on the internet.
 {: .warning }
 
 The idea of this plugin is to make it easy to display graphs of data. If data is presented in xml complying to the
@@ -109,6 +113,7 @@ mk.addCategory("category", "scale");
 mk.add("name", "1", "category");
 mk.save();
 {% endhighlight %}
+
 
 The previous code will produce a file called monkit.xml in the current working directory.
 
