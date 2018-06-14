@@ -1,14 +1,16 @@
 package net.praqma.jenkins.plugin.monkit;
 
+
+import edu.umd.cs.findbugs.annotations.*;
+
+@SuppressFBWarnings("BX_UNBOXING_IMMEDIATELY_REBOXED")
 public class MonKitTarget {
 	private Long healthy;
 	private Long unstable;
 	
 	private String category;
 	
-	public MonKitTarget() {
-		
-	}
+	public MonKitTarget() { }
 	
 	public MonKitTarget( String category, Long healthy, Long unhealthy, Long unstable ) {
 		this.category  = category;

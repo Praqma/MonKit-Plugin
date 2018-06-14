@@ -6,3 +6,4 @@ build/
 work/
 */_site/
 */\.sass-cache/
+.idea

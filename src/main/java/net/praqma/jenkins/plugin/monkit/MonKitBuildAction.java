@@ -3,11 +3,10 @@ package net.praqma.jenkins.plugin.monkit;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
+import hudson.model.*;
 import net.praqma.jenkins.plugin.monkit.MonKitPublisher.Case;
 import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitObservation;
@@ -27,16 +26,10 @@ import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Action;
-import hudson.model.HealthReport;
-import hudson.model.HealthReportingAction;
-import hudson.model.Result;
 import hudson.util.ChartUtil;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
 import hudson.util.ShiftedCategoryAxis;
-import java.util.HashMap;
 import net.sf.json.JSONArray;
 import net.sf.json.JsonConfig;
 
@@ -99,15 +92,16 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 	}
     
     public String getCategoryString() {
-        String result = "[";
+		StringBuffer result = new StringBuffer();
+		result.append("[");
         for(String s : getCategories()) {
-            result+="\""+s+"\""+",";
+        	result.append("\"");
+        	result.append(s);
+        	result.append("\",");
         }
-     
-        result+= "]";
-        return result;
+        result.append("]");
+        return result.toString();
     }
-
 
 	public List<MonKitCategory> getMonKitCategories() {
 		return monkit;
@@ -272,9 +266,10 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 
         Object[] header = new Object[cardinality];
         header[0] = "build";
-        for(String key : indexes.keySet()) {
-            header[indexes.get(key)] = key;
-        }
+		final Set<Map.Entry<String, Integer>> entries = indexes.entrySet();
+		for(Map.Entry<String,Integer> ent : entries) {
+			header[ent.getValue()] = ent.getKey();
+		}
 
         jso.add(0, header);
         
@@ -363,7 +358,7 @@ public class MonKitBuildAction implements HealthReportingAction, Action {
 			logger.finest( "Build " + a.getDisplayName() );
 
 			/* Make the x-axis label */
-			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel( a.build );
+			ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel( (Run<?, ?>)  a.build );
 
 			/* Loop the categories for current build */
 			for( MonKitCategory mkc : a.getMonKitCategories() ) {

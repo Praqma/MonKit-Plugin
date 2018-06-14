@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.*;
+import hudson.*;
+import jenkins.model.*;
 import net.praqma.monkit.MonKit;
 import net.praqma.monkit.MonKitCategory;
 import net.praqma.monkit.MonKitException;
@@ -15,10 +18,6 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
@@ -50,8 +49,12 @@ public class MonKitPublisher extends Recorder {
     
     @Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		
-		String version = Hudson.getInstance().getPlugin( "monkit-plugin" ).getWrapper().getVersion();
+        String version = "unknown";
+        Jenkins j = Jenkins.getInstance();
+        if(j != null && j.getPlugin("monkit-plugin") != null) {
+            PluginWrapper p = j.getPlugin("monkit-plugin").getWrapper();
+            if(p!=null) version = p.getVersion();
+        }
 		listener.getLogger().println( "MonKit Plugin version " + version );
 		
         final FilePath[] moduleRoots = build.getModuleRoots();
@@ -61,11 +64,10 @@ public class MonKitPublisher extends Recorder {
         FilePath[] reports = new FilePath[0];
                 
         try {
-            reports = moduleRoot.list(monKitFile);
-
+            if(moduleRoot != null && monKitFile != null) reports = moduleRoot.list(monKitFile);
             // if the build has failed, then there's not
             // much point in reporting an error
-            if (build.getResult().isWorseOrEqualTo(Result.FAILURE) && reports.length == 0) {
+            if (build.getResult() == null || build.getResult().isWorseOrEqualTo(Result.FAILURE) && reports.length == 0) {
                 listener.getLogger().println("Build failed, nothing to report");
                 return false;
             }
@@ -78,16 +80,16 @@ public class MonKitPublisher extends Recorder {
         }
         
         List<MonKit> mks = new ArrayList<MonKit>();
-        
+
         listener.getLogger().println(String.format("Found %s reports", reports.length));
-         
+
         for (int i = 0; i < reports.length; i++) {
-        	try {
-				MonKit mke = MonKit.fromString( reports[i].readToString() );
-				mks.add(mke);
-			} catch (MonKitException e) {
+            try {
+                MonKit mke = MonKit.fromString(reports[i].readToString());
+                mks.add(mke);
+            } catch (MonKitException e) {
                 e.printStackTrace(listener.fatalError("Unable to get " + reports[i].getName() + ". Skipping"));
-			}
+            }
         }
         
         MonKit mk = MonKit.merge(mks);
@@ -167,7 +169,8 @@ public class MonKitPublisher extends Recorder {
     	this.targets.clear();
     	this.targets = targets;
     }
-    
+
+    @SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC")
     public class Case {
     	Double health = 100d;
     	String category = "";
