@@ -53,10 +53,8 @@ public class MonKitProjectAction extends Actionable implements ProminentProjectA
         if (getLastResult() != null) {
             MonKitBuildAction mba = getLastResult();
             JSONArray arrays = new JSONArray();
-            int i = 0;
             for(String cat : mba.getCategories()) {
                 arrays.add(mba.graphData(cat, mba.getMonkitTargetForCategory(cat)));
-                i++;
             }
             return arrays;
             

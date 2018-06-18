@@ -31,7 +31,6 @@ import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
 import hudson.util.ShiftedCategoryAxis;
 import net.sf.json.JSONArray;
-import net.sf.json.JsonConfig;
 
 public class MonKitBuildAction implements HealthReportingAction, Action {
 

@@ -32,10 +32,6 @@
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
-        <repository>
-            <id>praqma-repo</id>
-            <url>http://code.praqma.net/repo/maven/</url>
-        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -63,7 +59,7 @@
         <dependency>
             <groupId>net.praqma</groupId>
             <artifactId>monkit</artifactId>
-            <version>0.1.9</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
